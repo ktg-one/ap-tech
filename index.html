@@ -49,9 +49,24 @@
 
   <style>
     :root {
-      --teal: #2dd4bf;
-      --blue: #3b82f6;
-      --bg: #020617;
+      /* Brand palette */
+      --teal:        #2dd4bf;
+      --blue:        #3b82f6;
+      --bg:          #020617;
+      /* Glow variants */
+      --teal-glow:   rgba(45,212,191,.40);
+      --blue-glow:   rgba(59,130,246,.40);
+      --teal-dim:    rgba(45,212,191,.12);
+      --blue-dim:    rgba(59,130,246,.12);
+      /* Surface stack */
+      --surface-1:   #0f172a;
+      --surface-2:   #1e293b;
+      /* Shadow system */
+      --shadow-sm:   0 1px 3px rgba(0,0,0,.40), 0 1px 2px rgba(0,0,0,.28);
+      --shadow-md:   0 4px 16px rgba(0,0,0,.50), 0 2px 6px rgba(0,0,0,.22);
+      --shadow-lg:   0 8px 32px rgba(0,0,0,.60), 0 4px 12px rgba(0,0,0,.28);
+      --shadow-teal: 0 0 24px rgba(45,212,191,.18), 0 0 8px rgba(45,212,191,.10);
+      --shadow-blue: 0 0 24px rgba(59,130,246,.18), 0 0 8px rgba(59,130,246,.10);
     }
     * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     html, body { background-color: var(--bg); }
@@ -242,6 +257,157 @@
       .aurora::before, .aurora::after { animation: none !important; }
       [data-reveal], [data-reveal-stagger] > *, .hero-split-line { opacity: 1 !important; transform: none !important; }
     }
+
+    /* ─── EXTENDED DESIGN UTILITIES ──────────────────────────── */
+
+    /* Shimmer keyframe */
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position:  200% center; }
+    }
+
+    /* Scroll-progress shimmer + glow */
+    .scroll-prog {
+      background: linear-gradient(90deg, var(--teal), var(--blue), var(--teal)) !important;
+      background-size: 200% auto !important;
+      animation: shimmer 3s linear infinite !important;
+      box-shadow: 0 0 14px rgba(45,212,191,.65) !important;
+    }
+
+    /* Nav glass enhancement */
+    nav.sticky, nav[class*="sticky"] {
+      backdrop-filter: blur(28px) saturate(200%) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+      box-shadow: 0 1px 0 rgba(45,212,191,.07),
+                  0 4px 32px rgba(0,0,0,.55) !important;
+    }
+
+    /* Logo image in nav */
+    .nav-logo-img {
+      height: 2.2rem;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 6px rgba(45,212,191,.35));
+    }
+
+    /* Metric card gradient border + lift */
+    .metric-card {
+      position: relative;
+      transition: transform .4s cubic-bezier(.16,1,.3,1),
+                  border-color .35s ease,
+                  box-shadow .35s ease !important;
+    }
+    .metric-card::before {
+      content: '';
+      position: absolute; inset: -1px;
+      border-radius: inherit;
+      background: linear-gradient(
+        135deg,
+        rgba(45,212,191,.45) 0%,
+        transparent 45%,
+        rgba(59,130,246,.30) 100%
+      );
+      opacity: 0;
+      transition: opacity .45s ease;
+      z-index: -1; pointer-events: none;
+    }
+    .metric-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(45,212,191,.7), transparent);
+      opacity: 0; transition: opacity .4s ease;
+    }
+    .metric-card:hover::before { opacity: 1; }
+    .metric-card:hover::after  { opacity: 1; }
+    .metric-card:hover {
+      transform: translateY(-6px) !important;
+      box-shadow: 0 0 0 1px rgba(45,212,191,.30),
+                  var(--shadow-lg),
+                  var(--shadow-teal) !important;
+    }
+
+    /* Hero chip hover */
+    [data-anim="hero-chip"] {
+      transition: all .3s cubic-bezier(.16,1,.3,1) !important;
+    }
+    [data-anim="hero-chip"]:hover {
+      border-color: rgba(45,212,191,.45) !important;
+      background: rgba(15,23,42,.92) !important;
+      box-shadow: 0 0 14px rgba(45,212,191,.12), var(--shadow-md) !important;
+      transform: translateY(-2px);
+    }
+
+    /* Card hover depth */
+    .ap-card-hover:hover {
+      box-shadow: 0 12px 40px rgba(0,0,0,.45),
+                  0 0 0 1px rgba(45,212,191,.12) !important;
+    }
+
+    /* Section badge pill */
+    .ap-badge {
+      display: inline-flex; align-items: center; gap: .375rem;
+      padding: .2rem .75rem; border-radius: 9999px;
+      background: rgba(45,212,191,.06);
+      border: 1px solid rgba(45,212,191,.18);
+      color: var(--teal);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .14em;
+    }
+
+    /* Carousel slide area polish */
+    #pitch-deck .slide-fade-in {
+      animation: slideFadeIn .45s cubic-bezier(.16,1,.3,1) both;
+    }
+
+    /* Real slide images - cover the full frame cleanly */
+    .slide-img-frame {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: #020617;
+    }
+    .slide-img-frame img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+    }
+
+    /* Footer gradient top border */
+    footer { position: relative; }
+    footer::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(45,212,191,.28),
+        rgba(59,130,246,.22),
+        transparent
+      );
+    }
+
+    /* Focus ring */
+    :focus-visible {
+      outline: 2px solid rgba(45,212,191,.70) !important;
+      outline-offset: 3px !important;
+    }
+
+    /* Selection highlight */
+    ::selection {
+      background: rgba(45,212,191,.25) !important;
+      color: #e2e8f0 !important;
+    }
+
+    /* Carousel control button polish */
+    [data-slide-prev], [data-slide-next] {
+      transition: all .3s cubic-bezier(.16,1,.3,1) !important;
+    }
+    [data-slide-prev]:hover:not(:disabled),
+    [data-slide-next]:hover:not(:disabled) {
+      box-shadow: 0 0 16px rgba(45,212,191,.25) !important;
+      border-color: rgba(45,212,191,.40) !important;
+    }
+
   </style>
 </head>
 <body class="text-slate-300 antialiased selection:bg-teal-500/30">
@@ -960,8 +1126,18 @@ function APTechnologiesPortal() {
     className: "flex items-center justify-between h-16"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex items-center space-x-2"
-  }, /*#__PURE__*/React.createElement(Activity, {
-    className: "h-6 w-6 text-teal-400"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: "assets/logo.png",
+    alt: "GoodAI logo",
+    className: "nav-logo-img",
+    onError: function(e) {
+      e.target.style.display = 'none';
+      var fb = e.target.nextSibling;
+      if (fb) fb.style.display = 'inline-flex';
+    }
+  }), /*#__PURE__*/React.createElement(Activity, {
+    className: "h-6 w-6 text-teal-400",
+    style: { display: 'none' }
   }), /*#__PURE__*/React.createElement("span", {
     className: "logo-text text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500 tracking-wider"
   }, "GoodAI"), /*#__PURE__*/React.createElement("span", {
@@ -1179,1172 +1355,15 @@ function APTechnologiesPortal() {
   }, "Strategic roadmap justifying AI automation integration and global China+1 expansion.")), /*#__PURE__*/React.createElement("div", {
     className: "bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col relative aspect-[16/10] md:aspect-video w-full max-h-[800px]"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 overflow-y-auto overflow-x-hidden relative custom-scrollbar"
-  }, currentSlide === 1 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col md:flex-row gap-12 bg-gradient-to-br from-slate-900 to-slate-950 slide-fade-in"
+    className: "flex-1 overflow-hidden relative bg-slate-950"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "md:w-1/2 flex flex-col justify-center"
-  }, /*#__PURE__*/React.createElement("h1", {
-    className: "text-3xl md:text-5xl font-bold text-white mb-4 leading-tight tracking-tight"
-  }, "AP Technologies: ", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    className: "text-teal-400"
-  }, "The AI-Driven Precision CDMO Platform")), /*#__PURE__*/React.createElement("p", {
-    className: "text-xl text-slate-300 mb-8"
-  }, "Scaling sub-micron manufacturing for global MedTech OEMs."), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-800/80 border border-slate-700 rounded-xl p-6 mb-8 relative overflow-hidden"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute left-0 top-0 bottom-0 w-1.5 bg-teal-500"
-  }), /*#__PURE__*/React.createElement("h4", {
-    className: "font-mono text-teal-400 text-xs uppercase tracking-widest mb-3"
-  }, "Presentation Objective"), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-300 text-sm leading-relaxed"
-  }, "To present an executive-ready strategic roadmap justifying AI automation integration at AP Technologies to protect its precision manufacturing moat, neutralize capacity constraints, and accelerate the ROI of its global China+1 expansion.")), /*#__PURE__*/React.createElement("ul", {
-    className: "space-y-3 text-slate-400 font-medium"
-  }, /*#__PURE__*/React.createElement("li", {
-    className: "flex items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-slate-500 mr-3"
-  }), " Backed by AGIC Capital Fund II"), /*#__PURE__*/React.createElement("li", {
-    className: "flex items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-slate-500 mr-3"
-  }), " 110,000+ sq. ft. Cleanroom Footprint"), /*#__PURE__*/React.createElement("li", {
-    className: "flex items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-slate-500 mr-3"
-  }), " $142.8B Target Market Shift"))), /*#__PURE__*/React.createElement("div", {
-    className: "md:w-1/2 flex items-center justify-center relative h-full"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(20,184,166,0.1)_0%,transparent_70%)] pointer-events-none"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "relative flex items-center justify-center p-12 w-full max-w-md aspect-square rounded-full border border-slate-800/50 bg-slate-900/50 shadow-[inset_0_0_50px_rgba(0,0,0,0.5)]"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full h-full rounded-full border-8 border-slate-700 bg-slate-800 relative shadow-2xl flex items-center justify-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-2 rounded-full border-4 border-slate-600"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-4 rounded-full border-4 border-teal-900/50 bg-slate-900"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute w-12 h-12 rounded-full border-4 border-teal-500 bg-slate-950 top-8 left-1/2 -translate-x-1/2 shadow-[0_0_15px_rgba(20,184,166,0.4)]"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute w-10 h-10 rounded-full border-4 border-blue-500 bg-slate-950 bottom-12 left-8 shadow-[0_0_15px_rgba(59,130,246,0.4)]"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute w-10 h-10 rounded-full border-4 border-blue-500 bg-slate-950 bottom-12 right-8 shadow-[0_0_15px_rgba(59,130,246,0.4)]"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute w-4 h-4 rounded-full bg-slate-400 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-4 right-0 bg-slate-900 border border-slate-700 px-3 py-1 rounded text-xs text-slate-300"
-  }, "Multi-Lumen Geometry"), /*#__PURE__*/React.createElement("div", {
-    className: "absolute bottom-4 right-[-20px] bg-slate-900 border border-slate-700 px-3 py-1 rounded text-xs text-slate-300"
-  }, "Sub-Micron Wall Thickness"), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -bottom-8 left-1/2 -translate-x-1/2 bg-slate-900 border border-slate-700 px-3 py-1 rounded text-xs text-slate-300 whitespace-nowrap"
-  }, "Vertically Integrated Construction")))), currentSlide === 2 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-b from-slate-900 to-slate-950 slide-fade-in"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center overflow-hidden"
-  }, /*#__PURE__*/React.createElement(Map, {
-    className: "w-full h-full min-w-[800px] min-h-[800px] text-slate-500",
-    strokeWidth: 0.5
-  })), /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl md:text-4xl font-bold text-white mb-16 tracking-tight relative z-10"
-  }, "The Competitive Baseline: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-blue-400"
-  }, "A Multi-Continent Moat")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 relative flex flex-col md:flex-row items-center justify-center gap-12 max-w-5xl mx-auto w-full z-10"
-  }, /*#__PURE__*/React.createElement("svg", {
-    className: "absolute inset-0 w-full h-full pointer-events-none hidden md:block",
-    style: {
-      zIndex: -1
-    }
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M 250 200 Q 500 100 650 120",
-    fill: "none",
-    stroke: "rgba(59,130,246,0.3)",
-    strokeWidth: "2",
-    strokeDasharray: "5,5"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M 250 200 Q 500 350 650 350",
-    fill: "none",
-    stroke: "rgba(59,130,246,0.3)",
-    strokeWidth: "2",
-    strokeDasharray: "5,5"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M 250 200 Q 500 250 650 250",
-    fill: "none",
-    stroke: "rgba(59,130,246,0.3)",
-    strokeWidth: "2",
-    strokeDasharray: "5,5"
-  }), /*#__PURE__*/React.createElement("line", {
-    x1: "750",
-    y1: "120",
-    x2: "750",
-    y2: "350",
-    stroke: "rgba(148,163,184,0.2)",
-    strokeWidth: "2"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "w-full md:w-1/3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900/90 backdrop-blur border-l-4 border-blue-500 rounded-r-xl p-5 shadow-xl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3 mb-2"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-500/20 p-2 rounded text-blue-400"
-  }, /*#__PURE__*/React.createElement(Activity, {
-    className: "w-5 h-5"
-  })), /*#__PURE__*/React.createElement("h3", {
-    className: "font-bold text-lg text-white"
-  }, "Irvine, CA, USA")), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-400 text-sm"
-  }, "Rapid Prototyping Catheter Lab. Synchronous R&D with Western OEMs."))), /*#__PURE__*/React.createElement("div", {
-    className: "w-full md:w-1/2 flex flex-col gap-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900/90 backdrop-blur border-l-4 border-slate-500 rounded-r-xl p-5 shadow-xl ml-0 md:ml-12"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3 mb-2"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-800 p-2 rounded text-slate-300"
-  }, /*#__PURE__*/React.createElement(Factory, {
-    className: "w-5 h-5"
-  })), /*#__PURE__*/React.createElement("h3", {
-    className: "font-bold text-lg text-white"
-  }, "Xiamen, China")), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-400 text-sm"
-  }, "High-volume extrusion hub. 70+ engineers, 100+ concurrent projects.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900/90 backdrop-blur border-l-4 border-orange-500 rounded-r-xl p-5 shadow-xl relative scale-105 shadow-[0_10px_30px_rgba(249,115,22,0.15)]"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-4 -right-4 bg-orange-500 text-white text-[10px] font-bold px-3 py-2 rounded-full uppercase tracking-wider shadow-lg transform rotate-3"
-  }, "EPE Status / Tariff Exempt"), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3 mb-2"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-orange-500/20 p-2 rounded text-orange-400"
-  }, /*#__PURE__*/React.createElement(Globe, {
-    className: "w-5 h-5"
-  })), /*#__PURE__*/React.createElement("h3", {
-    className: "font-bold text-lg text-white"
-  }, "Bac Ninh, Vietnam")), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-300 text-sm"
-  }, "The China+1 geopolitical hedge. 130,000 sq. ft. secondary processing.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900/90 backdrop-blur border-l-4 border-teal-500 rounded-r-xl p-5 shadow-xl ml-0 md:ml-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-3 mb-2"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-teal-500/20 p-2 rounded text-teal-400"
-  }, /*#__PURE__*/React.createElement(Building2, {
-    className: "w-5 h-5"
-  })), /*#__PURE__*/React.createElement("h3", {
-    className: "font-bold text-lg text-white"
-  }, "Singapore (HQ)")), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-400 text-sm"
-  }, "Strategic leadership, polymer IP, SAC-accredited ISO 13485 governance."))))), currentSlide === 3 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-b from-slate-900 to-slate-950 slide-fade-in"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl md:text-4xl font-bold text-white mb-12 tracking-tight"
-  }, "The Engineering Edge: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-purple-400"
-  }, "Sub-Micron Tolerance & Vertical Integration")), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col md:flex-row items-center gap-2 w-full mb-16"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 bg-slate-800 border border-slate-700 rounded-l-xl rounded-r-sm p-4 flex items-center justify-center gap-3 text-center w-full relative"
-  }, /*#__PURE__*/React.createElement(Layers, {
-    className: "w-6 h-6 text-slate-400"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white text-sm"
-  }, "Raw Polymer Compounding")), /*#__PURE__*/React.createElement("div", {
-    className: "relative w-8 h-8 flex items-center justify-center flex-shrink-0 my-2 md:my-0"
-  }, /*#__PURE__*/React.createElement(ChevronRight, {
-    className: "w-6 h-6 text-teal-500 absolute"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-8 left-1/2 -translate-x-1/2 bg-teal-900/80 border border-teal-500 text-teal-300 text-[9px] font-bold px-2 py-1 rounded whitespace-nowrap hidden lg:block"
-  }, "Zero Handoff Friction")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 bg-slate-800 border border-slate-700 rounded-sm p-4 flex items-center justify-center gap-3 text-center w-full relative"
-  }, /*#__PURE__*/React.createElement(GitMerge, {
-    className: "w-6 h-6 text-slate-400"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white text-sm"
-  }, "Sub-Micron Extrusion")), /*#__PURE__*/React.createElement("div", {
-    className: "relative w-8 h-8 flex items-center justify-center flex-shrink-0 my-2 md:my-0"
-  }, /*#__PURE__*/React.createElement(ChevronRight, {
-    className: "w-6 h-6 text-teal-500 absolute"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-8 left-1/2 -translate-x-1/2 bg-teal-900/80 border border-teal-500 text-teal-300 text-[9px] font-bold px-2 py-1 rounded whitespace-nowrap hidden lg:block"
-  }, "Zero Handoff Friction")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 bg-slate-800 border border-slate-700 rounded-sm p-4 flex items-center justify-center gap-3 text-center w-full relative"
-  }, /*#__PURE__*/React.createElement(Settings, {
-    className: "w-6 h-6 text-slate-400"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white text-sm"
-  }, "Secondary Processing (Braiding/Laser)")), /*#__PURE__*/React.createElement("div", {
-    className: "relative w-8 h-8 flex items-center justify-center flex-shrink-0 my-2 md:my-0"
-  }, /*#__PURE__*/React.createElement(ChevronRight, {
-    className: "w-6 h-6 text-teal-500 absolute"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-8 left-1/2 -translate-x-1/2 bg-teal-900/80 border border-teal-500 text-teal-300 text-[9px] font-bold px-2 py-1 rounded whitespace-nowrap hidden lg:block"
-  }, "Zero Handoff Friction")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 bg-slate-800 border border-slate-700 rounded-r-xl rounded-l-sm p-4 flex items-center justify-center gap-3 text-center w-full"
-  }, /*#__PURE__*/React.createElement(ShieldCheck, {
-    className: "w-6 h-6 text-slate-400"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white text-sm"
-  }, "Sterile Assembly & Packaging"))), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 flex flex-col md:flex-row items-center gap-12"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "md:w-1/2 flex items-center gap-8 justify-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-48 h-48 rounded-full border-2 border-slate-700 flex items-center justify-center bg-[repeating-linear-gradient(45deg,transparent,transparent_4px,rgba(255,255,255,0.05)_4px,rgba(255,255,255,0.05)_8px)] relative shadow-2xl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-2 rounded-full border-[12px] border-blue-900/50 bg-slate-900 flex items-center justify-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-24 h-24 rounded-full border-4 border-teal-500 bg-slate-950"
+    key: currentSlide,
+    className: "slide-img-frame slide-fade-in"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: "assets/The_AI_Powered_CDMO/Slide" + currentSlide + ".JPG",
+    alt: "Slide " + currentSlide + " of " + totalSlides,
+    loading: "eager"
   }))), /*#__PURE__*/React.createElement("div", {
-    className: "space-y-6"
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "text-white font-bold text-sm flex items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-2 h-[2px] bg-teal-500 mr-2"
-  }), " HDPE Inner Liner"), /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-500 text-xs pl-4"
-  }, "(Lubricity)")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "text-white font-bold text-sm flex items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-2 h-[2px] bg-blue-500 mr-2"
-  }), " LLDPE Tie-Layer"), /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-500 text-xs pl-4"
-  }, "(Molecular Bond)")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "text-white font-bold text-sm flex items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-2 h-[2px] bg-slate-500 mr-2"
-  }), " Pebax Outer Jacket"), /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-500 text-xs pl-4"
-  }, "(Flexibility/Burst Strength)")))), /*#__PURE__*/React.createElement("div", {
-    className: "md:w-1/2 w-full"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-950/30 border border-blue-900 rounded-xl overflow-hidden shadow-lg"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-900/50 px-6 py-3 border-b border-blue-800"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white tracking-wider"
-  }, "Precision Metrics:")), /*#__PURE__*/React.createElement("ul", {
-    className: "p-6 space-y-4 text-slate-300 font-medium"
-  }, /*#__PURE__*/React.createElement("li", {
-    className: "flex items-center gap-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-blue-400"
-  }), " Minimum CpK: ", /*#__PURE__*/React.createElement("strong", {
-    className: "text-white font-bold"
-  }, "1.33"), " (99.99% compliance)"), /*#__PURE__*/React.createElement("li", {
-    className: "flex items-center gap-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-blue-400"
-  }), " Minimum Wall Thickness: ", /*#__PURE__*/React.createElement("strong", {
-    className: "text-white font-bold"
-  }, "0.0005 inches")), /*#__PURE__*/React.createElement("li", {
-    className: "flex items-center gap-3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-blue-400"
-  }), " Dimensional Tolerance: ", /*#__PURE__*/React.createElement("strong", {
-    className: "text-white font-bold"
-  }, "\xB10.0003 inches"))))))), currentSlide === 4 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-br from-slate-900 to-slate-950 slide-fade-in"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl md:text-4xl font-bold text-white mb-12 tracking-tight"
-  }, "The Market Catalyst: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-orange-400"
-  }, "Why Transform Now?")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 flex flex-col md:flex-row gap-12 h-full"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full md:w-1/2 flex flex-col border-r border-slate-800 pr-12"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "text-xl font-bold text-white mb-8 text-center"
-  }, "The Macro Pressures"), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 flex items-end justify-center gap-6 border-b border-l border-slate-700 pb-4 pl-4 relative h-64"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col items-center w-24"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full bg-slate-700 rounded-t-sm",
-    style: {
-      height: '30px'
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -bottom-8 text-xs font-bold text-slate-400 text-center"
-  }, "Current", /*#__PURE__*/React.createElement("br", null), "Costs")), /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-500 mb-8"
-  }, /*#__PURE__*/React.createElement(ArrowUpRight, {
-    className: "w-6 h-6"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col items-center w-24 relative"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-10 text-xs font-bold text-orange-400 text-center w-32 -ml-4"
-  }, "20%-40%", /*#__PURE__*/React.createElement("br", null), "US Base Tariffs"), /*#__PURE__*/React.createElement("div", {
-    className: "w-full bg-orange-500/80 rounded-t-sm",
-    style: {
-      height: '120px'
-    }
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-500 mb-20"
-  }, /*#__PURE__*/React.createElement(ArrowUpRight, {
-    className: "w-6 h-6"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col items-center w-24 relative"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-10 text-xs font-bold text-blue-400 text-center w-32 -ml-4"
-  }, "200%", /*#__PURE__*/React.createElement("br", null), "Biocomponent Tariffs"), /*#__PURE__*/React.createElement("div", {
-    className: "w-full bg-blue-500/80 rounded-t-sm",
-    style: {
-      height: '220px'
-    }
-  }))), /*#__PURE__*/React.createElement("p", {
-    className: "text-center text-sm text-slate-400 mt-12 px-4"
-  }, "Western OEMs are frantically seeking China+1 capacity for Class II/III cardiovascular devices to avoid punitive tariffs.")), /*#__PURE__*/React.createElement("div", {
-    className: "w-full md:w-1/2 flex flex-col items-center justify-center"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "text-xl font-bold text-white mb-8 text-center"
-  }, "The Bottleneck & Threat"), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col items-center mb-8 relative w-full max-w-xs"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-800 border border-slate-700 text-white font-bold py-2 px-6 rounded-lg mb-2 shadow-lg z-10"
-  }, "100+ Concurrent OEM Projects"), /*#__PURE__*/React.createElement("div", {
-    className: "flex gap-4 mb-2 z-10"
-  }, /*#__PURE__*/React.createElement(ArrowDown, {
-    className: "w-6 h-6 text-blue-400"
-  }), /*#__PURE__*/React.createElement(ArrowDown, {
-    className: "w-6 h-6 text-orange-400"
-  }), /*#__PURE__*/React.createElement(ArrowDown, {
-    className: "w-6 h-6 text-blue-400"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "w-48 border-[24px] border-transparent border-t-slate-700 relative flex justify-center items-center drop-shadow-2xl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-[24px] w-40 border-[20px] border-transparent border-t-slate-900 flex justify-center"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute top-[0px] w-8 h-12 bg-slate-700"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute top-[0px] w-6 h-12 bg-slate-900"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "flex items-center gap-4 mt-6 z-10"
-  }, /*#__PURE__*/React.createElement(Filter, {
-    className: "w-6 h-6 text-slate-500"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white"
-  }, "70+ Specialized Engineers"))), /*#__PURE__*/React.createElement("div", {
-    className: "bg-red-950/30 border border-red-900/50 rounded-xl p-4 text-center max-w-sm"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "text-red-400 block mb-1"
-  }, "Consolidation Threat:"), /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-400 text-xs leading-relaxed"
-  }, "Well-funded competitors (e.g., TEAM Technologies via Arlington Capital's $3.8B Fund) are actively scaling through acquisitions."))))), currentSlide === 5 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-b from-slate-900 to-slate-950 slide-fade-in"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl md:text-4xl font-bold text-white mb-12 tracking-tight text-center"
-  }, "Synthesis: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-teal-400"
-  }, "The AI Multiplier Effect")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 relative flex flex-col justify-center px-12"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "relative w-full h-80 border-b-2 border-l-2 border-slate-700"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -left-12 top-1/2 -translate-y-1/2 -rotate-90 text-sm font-bold text-slate-400 tracking-widest uppercase"
-  }, "Required Headcount"), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -bottom-10 left-1/2 -translate-x-1/2 text-sm font-bold text-slate-400 tracking-widest uppercase"
-  }, "Production Volume"), /*#__PURE__*/React.createElement("svg", {
-    className: "absolute inset-0 w-full h-full overflow-visible",
-    preserveAspectRatio: "none"
-  }, /*#__PURE__*/React.createElement("line", {
-    x1: "0",
-    y1: "50%",
-    x2: "100%",
-    y2: "50%",
-    stroke: "#64748b",
-    strokeWidth: "4"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M 0 80% C 40% 80%, 50% 50%, 90% 10%",
-    fill: "none",
-    stroke: "#2dd4bf",
-    strokeWidth: "6",
-    className: "drop-shadow-[0_0_8px_rgba(45,212,191,0.6)]"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "45%",
-    cy: "50%",
-    r: "10",
-    fill: "#f59e0b",
-    stroke: "#fff",
-    strokeWidth: "3",
-    className: "drop-shadow-[0_0_12px_rgba(245,158,11,1)]"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "absolute right-4 top-[45%] -translate-y-full text-right"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-300 font-bold text-sm"
-  }, "Linear Constraint:"), /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-500 text-xs"
-  }, "Traditional Engineering Headcount")), /*#__PURE__*/React.createElement("div", {
-    className: "absolute left-[65%] top-[10%] -translate-y-full text-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-teal-400 font-bold text-sm"
-  }, "Exponential Scale:"), /*#__PURE__*/React.createElement("div", {
-    className: "text-teal-500/70 text-xs"
-  }, "Capacity via AI Automation")), /*#__PURE__*/React.createElement("div", {
-    className: "absolute left-[45%] top-[55%] bg-orange-950/40 border border-orange-500/50 rounded-lg p-4 w-72 backdrop-blur-md shadow-xl"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "text-orange-400 text-sm block mb-1"
-  }, "Codifying Tacit Knowledge."), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-300 text-xs leading-relaxed"
-  }, "AI extracts proprietary micro-extrusion expertise from 70+ engineers, encapsulating experiential knowledge into globally deployable, reproducible models."))), /*#__PURE__*/React.createElement("div", {
-    className: "mt-20 mx-auto bg-slate-800 border border-slate-700 rounded-full px-6 py-3 text-sm text-center shadow-lg"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "text-white"
-  }, "Elevating the CpK:"), " ", /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-400"
-  }, "Moving from periodic human sampling to continuous, adaptive, machine-led process control.")))), currentSlide === 6 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-br from-slate-900 to-slate-950 slide-fade-in"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl font-bold text-white mb-8 tracking-tight"
-  }, "AI Opportunity 1: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-blue-400"
-  }, "Predictive Maintenance for Precision Equipment")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 flex flex-col lg:flex-row gap-12"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "lg:w-2/3 flex items-center justify-center relative bg-slate-950 border border-slate-800 rounded-2xl p-8 overflow-hidden shadow-inner"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "relative w-full max-w-2xl flex items-center gap-2"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-2 relative"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-16 left-0 bg-slate-800 border border-slate-700 px-3 py-2 rounded text-xs text-center w-32 shadow-lg"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "text-slate-300 block"
-  }, "Vibration Profile:"), /*#__PURE__*/React.createElement("span", {
-    className: "text-teal-400 font-mono"
-  }, "Nominal")), /*#__PURE__*/React.createElement("div", {
-    className: "w-16 h-20 bg-slate-800 clip-path-polygon-[0_0,100%_0,70%_100%,30%_100%] mx-auto border-t-4 border-slate-600"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "w-24 h-24 bg-slate-700 rounded-xl border border-slate-600 flex items-center justify-center relative"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -right-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-teal-500 animate-pulse shadow-[0_0_10px_rgba(20,184,166,1)]"
-  }), /*#__PURE__*/React.createElement(Zap, {
-    className: "w-8 h-8 text-slate-500"
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 h-12 bg-slate-800 border-y border-slate-600 relative overflow-hidden flex items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full h-4 bg-[repeating-linear-gradient(45deg,transparent,transparent_10px,rgba(255,255,255,0.1)_10px,rgba(255,255,255,0.1)_20px)]"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "relative"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-20 -left-12 bg-orange-950/80 border border-orange-500/50 px-3 py-2 rounded text-xs text-center w-36 shadow-lg z-20 backdrop-blur"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "text-orange-400 block"
-  }, "Thermal Drift:"), /*#__PURE__*/React.createElement("span", {
-    className: "text-orange-300 font-mono text-[10px]"
-  }, "Anomaly Predicted in 48 hrs")), /*#__PURE__*/React.createElement("div", {
-    className: "w-20 h-24 bg-slate-700 rounded-lg border-2 border-orange-500 flex items-center justify-center relative shadow-[0_0_20px_rgba(249,115,22,0.4)]"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -left-2 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-orange-500 animate-ping"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-red-600"
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "relative flex items-center gap-1"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-4 h-16 bg-slate-600 rounded"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "w-4 h-16 bg-slate-600 rounded relative"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -bottom-16 -left-12 bg-slate-800 border border-slate-700 px-3 py-2 rounded text-xs text-center w-32 shadow-lg z-20"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "text-slate-300 block"
-  }, "Acoustic Signature:"), /*#__PURE__*/React.createElement("span", {
-    className: "text-teal-400 font-mono"
-  }, "Stable")), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -left-1 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-teal-500 shadow-[0_0_10px_rgba(20,184,166,1)]"
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "w-24 h-1 bg-teal-400 shadow-[0_0_8px_rgba(20,184,166,0.8)] ml-2"
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "lg:w-1/3 flex flex-col justify-center space-y-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-900/40 px-4 py-2 border-b border-blue-900/50"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white text-sm"
-  }, "The Challenge:")), /*#__PURE__*/React.createElement("p", {
-    className: "p-4 text-slate-400 text-sm"
-  }, "Unplanned downtime across 10+ custom extrusion lines delays 100+ OEM programs.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-900/40 px-4 py-2 border-b border-blue-900/50"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white text-sm"
-  }, "The AI Solution:")), /*#__PURE__*/React.createElement("p", {
-    className: "p-4 text-slate-400 text-sm"
-  }, "Sensor-augmented condition monitoring on extruders, braiding clusters, and femtosecond lasers.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-emerald-500"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-emerald-900/20 px-4 py-2 border-b border-slate-800"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white text-sm"
-  }, "Financial Impact:")), /*#__PURE__*/React.createElement("ul", {
-    className: "p-4 space-y-3 text-slate-300 text-sm"
-  }, /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 mr-2 flex-shrink-0"
-  }), " ", /*#__PURE__*/React.createElement("strong", null, "25% expected reduction"), " in unplanned downtime."), /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 mr-2 flex-shrink-0"
-  }), " ", /*#__PURE__*/React.createElement("strong", null, "$355K - $585K"), " in annual savings from recovered capacity and reduced scrap.")))))), currentSlide === 7 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-br from-slate-900 to-slate-950 slide-fade-in overflow-y-auto custom-scrollbar"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl font-bold text-white mb-8 tracking-tight"
-  }, "The Strategic Sandbox: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-emerald-400"
-  }, "The Greenfield Vietnam Advantage")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 flex flex-col lg:flex-row gap-12"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "lg:w-3/5 relative flex items-center justify-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-full aspect-[4/3] bg-slate-900 border-2 border-slate-700 rounded-xl p-4 grid grid-cols-4 grid-rows-3 gap-2 relative shadow-2xl"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "col-span-2 row-span-2 bg-blue-900/20 border border-blue-500/30 rounded flex items-center justify-center relative group"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-blue-400 text-xs font-bold uppercase tracking-widest opacity-50 group-hover:opacity-100 transition-opacity"
-  }, "Cleanroom Zone"), /*#__PURE__*/React.createElement("div", {
-    className: "absolute flex items-center justify-center animate-pulse"
-  }, /*#__PURE__*/React.createElement(Crosshair, {
-    className: "w-12 h-12 text-red-500"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-12 bg-red-950/80 border border-red-500/50 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "bg-red-500 text-white rounded-full w-4 h-4 inline-flex items-center justify-center mr-1 text-[10px]"
-  }, "1"), "130,000 sq. ft. Class 7 & 8"))), /*#__PURE__*/React.createElement("div", {
-    className: "col-span-1 row-span-1 bg-slate-800/50 border border-slate-700 rounded flex items-center justify-center"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-500 text-[10px] uppercase"
-  }, "Gowning")), /*#__PURE__*/React.createElement("div", {
-    className: "col-span-1 row-span-2 bg-slate-800/50 border border-slate-700 rounded flex items-center justify-center"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-500 text-[10px] uppercase"
-  }, "Warehouse")), /*#__PURE__*/React.createElement("div", {
-    className: "col-span-1 row-span-1 bg-slate-800/50 border border-slate-700 rounded flex items-center justify-center"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-500 text-[10px] uppercase"
-  }, "Material Airlock")), /*#__PURE__*/React.createElement("div", {
-    className: "col-span-3 row-span-1 bg-teal-900/20 border border-teal-500/30 rounded flex items-center justify-center relative group"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-teal-400 text-xs font-bold uppercase tracking-widest opacity-50 group-hover:opacity-100 transition-opacity"
-  }, "Automated Workshop"), /*#__PURE__*/React.createElement("div", {
-    className: "absolute left-1/4 flex items-center justify-center animate-pulse"
-  }, /*#__PURE__*/React.createElement(Crosshair, {
-    className: "w-12 h-12 text-red-500"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -bottom-10 bg-red-950/80 border border-red-500/50 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "bg-red-500 text-white rounded-full w-4 h-4 inline-flex items-center justify-center mr-1 text-[10px]"
-  }, "3"), "Automated Knitting Clusters"))), /*#__PURE__*/React.createElement("div", {
-    className: "col-span-1 row-span-1 bg-purple-900/20 border border-purple-500/30 rounded flex items-center justify-center relative group"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "text-purple-400 text-xs font-bold uppercase tracking-widest opacity-50 group-hover:opacity-100 transition-opacity text-center"
-  }, "Data Center"), /*#__PURE__*/React.createElement("div", {
-    className: "absolute flex items-center justify-center animate-pulse"
-  }, /*#__PURE__*/React.createElement(Crosshair, {
-    className: "w-10 h-10 text-red-500"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-10 -right-4 bg-red-950/80 border border-red-500/50 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "bg-red-500 text-white rounded-full w-4 h-4 inline-flex items-center justify-center mr-1 text-[10px]"
-  }, "2"), "Edge Computing"))))), /*#__PURE__*/React.createElement("div", {
-    className: "lg:w-2/5 flex flex-col justify-center space-y-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-slate-500"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-800/50 px-4 py-2 border-b border-slate-800"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white text-sm"
-  }, "The Bac Ninh Facility:")), /*#__PURE__*/React.createElement("p", {
-    className: "p-4 text-slate-300 text-sm leading-relaxed"
-  }, "Opened October 2025 in Yen Phong Industrial Park, engineered specifically for high-volume catheter production.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-teal-500"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-teal-900/20 px-4 py-2 border-b border-slate-800"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white text-sm"
-  }, "Automation-First Design:")), /*#__PURE__*/React.createElement("p", {
-    className: "p-4 text-slate-300 text-sm leading-relaxed"
-  }, "Unlike legacy retrofits, the greenfield expansion enables day-one integration of IoT sensors, digital dashboards, and autonomous control loops without operational disruption.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-500"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-900/20 px-4 py-2 border-b border-slate-800"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white text-sm"
-  }, "Existing Automation Base:")), /*#__PURE__*/React.createElement("p", {
-    className: "p-4 text-slate-300 text-sm leading-relaxed"
-  }, "Automated braiding clusters are already delivering stable capacity, serving as the ideal physical foundation for predictive analytics integration."))))), currentSlide === 8 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-br from-slate-900 to-slate-950 slide-fade-in overflow-y-auto custom-scrollbar"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl font-bold text-white mb-8 tracking-tight"
-  }, "Competitive Positioning Matrix: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-teal-400"
-  }, "The AI Leapfrog")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 flex flex-col"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl mb-8 flex-1"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-5 text-sm font-bold text-center border-b border-slate-700 bg-slate-950"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex items-center justify-start text-slate-400"
-  }, "Capability"), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 text-slate-300"
-  }, "Global Tier-1s", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-slate-500 font-normal"
-  }, "(e.g. Integer/Teleflex)")), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 text-slate-300"
-  }, "Regional APAC", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-slate-500 font-normal"
-  }, "Players")), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 text-slate-300"
-  }, "TEAM / DUKE", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-slate-500 font-normal"
-  }, "Empirical")), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 bg-teal-900/20 text-teal-400 border-b-2 border-teal-500 shadow-[inset_0_0_20px_rgba(20,184,166,0.1)]"
-  }, "AP Tech", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-teal-500 font-normal"
-  }, "(AI-Enhanced)"))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-5 text-center border-b border-slate-800 items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 text-left font-semibold text-slate-300"
-  }, "Sub-Micron Precision", /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-slate-500 font-normal"
-  }, "(CpK 1.33)")), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(Check, {
-    className: "w-8 h-8 text-emerald-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(X, {
-    className: "w-8 h-8 text-red-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(Check, {
-    className: "w-8 h-8 text-emerald-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 bg-teal-900/10 flex justify-center"
-  }, /*#__PURE__*/React.createElement(Check, {
-    className: "w-8 h-8 text-teal-400 drop-shadow-[0_0_8px_rgba(20,184,166,0.8)]",
-    strokeWidth: 4
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-5 text-center border-b border-slate-800 items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 text-left font-semibold text-slate-300"
-  }, "Agile R&D Prototyping"), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(X, {
-    className: "w-8 h-8 text-red-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(Check, {
-    className: "w-8 h-8 text-emerald-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(Check, {
-    className: "w-8 h-8 text-emerald-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 bg-teal-900/10 flex justify-center"
-  }, /*#__PURE__*/React.createElement(Check, {
-    className: "w-8 h-8 text-teal-400 drop-shadow-[0_0_8px_rgba(20,184,166,0.8)]",
-    strokeWidth: 4
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-5 text-center border-b border-slate-800 items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 text-left font-semibold text-slate-300"
-  }, "Low-Cost APAC Cost Structure"), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(X, {
-    className: "w-8 h-8 text-red-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(Check, {
-    className: "w-8 h-8 text-emerald-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(X, {
-    className: "w-8 h-8 text-red-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 bg-teal-900/10 flex justify-center"
-  }, /*#__PURE__*/React.createElement(Check, {
-    className: "w-8 h-8 text-teal-400 drop-shadow-[0_0_8px_rgba(20,184,166,0.8)]",
-    strokeWidth: 4
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-5 text-center items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 text-left font-semibold text-slate-300"
-  }, "AI-Driven QA & Yield Automation"), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(X, {
-    className: "w-8 h-8 text-red-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(X, {
-    className: "w-8 h-8 text-red-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 border-r border-slate-800 flex justify-center"
-  }, /*#__PURE__*/React.createElement(X, {
-    className: "w-8 h-8 text-red-500",
-    strokeWidth: 3
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "p-4 bg-teal-900/10 flex justify-center py-6"
-  }, /*#__PURE__*/React.createElement(Check, {
-    className: "w-10 h-10 text-teal-400 drop-shadow-[0_0_12px_rgba(20,184,166,1)]",
-    strokeWidth: 4
-  })))), /*#__PURE__*/React.createElement("p", {
-    className: "text-center text-slate-300 text-sm max-w-4xl mx-auto"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "text-white"
-  }, "Market Dynamics:"), " Tier-1s face high Western overhead, while regional APAC players lack precision and FDA-grade QA. AP Tech uniquely combines automated precision with regional cost structures."))), currentSlide === 9 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-br from-slate-900 to-slate-950 slide-fade-in overflow-y-auto custom-scrollbar"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl font-bold text-white mb-12 tracking-tight text-center"
-  }, "Deployment Roadmap: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-blue-400"
-  }, "Building the Digital Backbone")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 flex items-center justify-center w-full"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col md:flex-row w-full h-full max-h-96 gap-1 md:gap-2"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 bg-slate-800 rounded-lg flex flex-col relative overflow-hidden group"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-700 p-4 text-center border-b border-slate-600"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "font-bold text-white uppercase tracking-wider text-sm"
-  }, "Foundation"), /*#__PURE__*/React.createElement("span", {
-    className: "text-slate-400 text-xs"
-  }, "(Months 1-6)")), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 flex-1 flex flex-col justify-center"
-  }, /*#__PURE__*/React.createElement("ul", {
-    className: "space-y-4 text-sm text-slate-300"
-  }, /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-slate-400 mt-1.5 mr-2 flex-shrink-0"
-  }), " Establish global data taxonomy across ERPs."), /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-slate-400 mt-1.5 mr-2 flex-shrink-0"
-  }), " Instrument Vietnam and Xiamen equipment with IoT sensor arrays."))), /*#__PURE__*/React.createElement(ArrowRight, {
-    className: "absolute bottom-4 right-4 w-6 h-6 text-slate-600"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 bg-blue-900/30 border border-blue-900/50 rounded-lg flex flex-col relative overflow-hidden group shadow-[inset_0_0_20px_rgba(59,130,246,0.05)]"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-900/50 p-4 text-center border-b border-blue-800"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "font-bold text-blue-100 uppercase tracking-wider text-sm"
-  }, "Quick Wins"), /*#__PURE__*/React.createElement("span", {
-    className: "text-blue-300 text-xs"
-  }, "(Months 6-12)")), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 flex-1 flex flex-col justify-center"
-  }, /*#__PURE__*/React.createElement("ul", {
-    className: "space-y-4 text-sm text-blue-100"
-  }, /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 mr-2 flex-shrink-0"
-  }), " Deploy predictive maintenance on extrusion lines."), /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-blue-400 mt-1.5 mr-2 flex-shrink-0"
-  }), " Implement AI vision inspection in pilot cleanrooms."))), /*#__PURE__*/React.createElement(ArrowRight, {
-    className: "absolute bottom-4 right-4 w-6 h-6 text-blue-500/50"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 bg-blue-800/40 border border-blue-700/50 rounded-lg flex flex-col relative overflow-hidden group shadow-[inset_0_0_30px_rgba(59,130,246,0.1)]"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-800/60 p-4 text-center border-b border-blue-700"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "font-bold text-white uppercase tracking-wider text-sm"
-  }, "Closed-Loop Scaling"), /*#__PURE__*/React.createElement("span", {
-    className: "text-blue-200 text-xs"
-  }, "(Year 2)")), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 flex-1 flex flex-col justify-center"
-  }, /*#__PURE__*/React.createElement("ul", {
-    className: "space-y-4 text-sm text-white"
-  }, /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-blue-300 mt-1.5 mr-2 flex-shrink-0"
-  }), " Activate real-time adaptive process controls."), /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-blue-300 mt-1.5 mr-2 flex-shrink-0"
-  }), " Deploy dynamic AI inventory optimization across network."))), /*#__PURE__*/React.createElement(ArrowRight, {
-    className: "absolute bottom-4 right-4 w-6 h-6 text-blue-400"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 bg-teal-900/40 border border-teal-700/50 rounded-lg flex flex-col relative overflow-hidden group shadow-[inset_0_0_40px_rgba(20,184,166,0.15)]"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-teal-800/60 p-4 text-center border-b border-teal-700"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "font-bold text-white uppercase tracking-wider text-sm"
-  }, "Predictive R&D"), /*#__PURE__*/React.createElement("span", {
-    className: "text-teal-200 text-xs"
-  }, "(Year 3)")), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 flex-1 flex flex-col justify-center"
-  }, /*#__PURE__*/React.createElement("ul", {
-    className: "space-y-4 text-sm text-white"
-  }, /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-teal-400 mt-1.5 mr-2 flex-shrink-0"
-  }), " Integrate generative design and thermal prediction tools."), /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-teal-400 mt-1.5 mr-2 flex-shrink-0"
-  }), " OEM co-development in Irvine catheter lab."))))))), currentSlide === 10 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-br from-slate-900 to-slate-950 slide-fade-in overflow-y-auto custom-scrollbar"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl md:text-4xl font-bold text-white mb-12 tracking-tight text-center"
-  }, "Summary: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-teal-400"
-  }, "The Value Creation Equation")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl mx-auto"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-lg group hover:border-teal-500/50 transition-colors"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-400 font-bold uppercase tracking-wider text-sm mb-4"
-  }, "Margin Expansion"), /*#__PURE__*/React.createElement("div", {
-    className: "text-4xl md:text-5xl font-extrabold text-teal-400 mb-4 tracking-tight"
-  }, "$500K+ & 20%"), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-300 text-sm leading-relaxed max-w-sm"
-  }, "Annual savings in recovered machine uptime, coupled with a 20% global inventory cost reduction and drastically lowered scrap rates.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-lg group hover:border-blue-500/50 transition-colors"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-400 font-bold uppercase tracking-wider text-sm mb-4"
-  }, "Revenue Acceleration"), /*#__PURE__*/React.createElement("div", {
-    className: "text-4xl md:text-5xl font-extrabold text-blue-400 mb-4 tracking-tight"
-  }, "Faster NPI"), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-300 text-sm leading-relaxed max-w-sm"
-  }, "Accelerated New Product Introduction cycles via predictive DFM. Expanded volume capacity without bottlenecking on human engineering talent.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-lg group hover:border-blue-500/50 transition-colors"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-400 font-bold uppercase tracking-wider text-sm mb-4"
-  }, "Strategic Resilience"), /*#__PURE__*/React.createElement("div", {
-    className: "text-4xl md:text-5xl font-extrabold text-blue-400 mb-4 tracking-tight"
-  }, "Audited & Exempt"), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-300 text-sm leading-relaxed max-w-sm"
-  }, "Absolute protection of the China+1 tariff bypass strategy through flawless, digitally audited AI quality control in Vietnam.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-2xl p-8 flex flex-col items-center justify-center text-center shadow-lg group hover:border-teal-500/50 transition-colors shadow-[0_0_30px_rgba(20,184,166,0.1)]"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-400 font-bold uppercase tracking-wider text-sm mb-4"
-  }, "Enterprise Valuation"), /*#__PURE__*/React.createElement("div", {
-    className: "text-4xl md:text-5xl font-extrabold text-teal-400 mb-4 tracking-tight"
-  }, "Premium Multiple"), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-300 text-sm leading-relaxed max-w-sm"
-  }, "Transitioning from a traditional CDMO to a digitally integrated, automated platform commands premium valuation multiples upon future exit.")))), currentSlide === 11 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-br from-slate-900 to-slate-950 slide-fade-in overflow-y-auto custom-scrollbar"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl font-bold text-white mb-8 tracking-tight"
-  }, "AI Opportunity 2: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-blue-400"
-  }, "Closed-Loop Quality & Machine Vision")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 flex flex-col lg:flex-row gap-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "lg:w-2/3 flex flex-col gap-8"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900/50 border border-slate-800 rounded-2xl p-6"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "text-lg font-bold text-slate-300 mb-6 text-center"
-  }, "Traditional Process (Human Dependent)"), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col sm:flex-row items-center justify-center gap-2 w-full mb-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-800 border border-slate-700 rounded-md p-3 text-center flex-1 w-full"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white text-sm"
-  }, "Extrude")), /*#__PURE__*/React.createElement(ArrowRight, {
-    className: "w-5 h-5 text-slate-600 hidden sm:block"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-800 border border-slate-700 rounded-md p-3 text-center flex-1 w-full"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white text-sm"
-  }, "Periodic Human Sample")), /*#__PURE__*/React.createElement(ArrowRight, {
-    className: "w-5 h-5 text-slate-600 hidden sm:block"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-800 border border-slate-700 rounded-md p-3 text-center flex-1 w-full"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white text-sm"
-  }, "Manual Measurement")), /*#__PURE__*/React.createElement(ArrowRight, {
-    className: "w-5 h-5 text-slate-600 hidden sm:block"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-800 border border-slate-700 rounded-md p-3 text-center flex-1 w-full"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white text-sm"
-  }, "Slow Manual Adjustment"))), /*#__PURE__*/React.createElement("p", {
-    className: "text-center text-slate-400 text-sm mt-4 border-t border-slate-800 pt-4"
-  }, "Vulnerable to human fatigue and sampling gaps.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-950/20 border border-blue-900/50 rounded-2xl p-6 relative shadow-[0_0_30px_rgba(59,130,246,0.1)]"
-  }, /*#__PURE__*/React.createElement("h3", {
-    className: "text-lg font-bold text-blue-300 mb-6 text-center"
-  }, "AI Closed-Loop Process (Continuous)"), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col sm:flex-row items-center justify-center gap-6 w-full py-4 relative"
-  }, /*#__PURE__*/React.createElement("svg", {
-    className: "absolute inset-0 w-full h-full pointer-events-none hidden sm:block",
-    style: {
-      zIndex: 0
-    }
-  }, /*#__PURE__*/React.createElement("path", {
-    d: "M 500 20 L 100 20 L 100 50",
-    fill: "none",
-    stroke: "rgba(59,130,246,0.5)",
-    strokeWidth: "2"
-  }), /*#__PURE__*/React.createElement("polygon", {
-    points: "95,45 105,45 100,55",
-    fill: "rgba(59,130,246,0.5)"
-  }), /*#__PURE__*/React.createElement("path", {
-    d: "M 500 100 L 100 100 L 100 70",
-    fill: "none",
-    stroke: "rgba(59,130,246,0.5)",
-    strokeWidth: "2"
-  }), /*#__PURE__*/React.createElement("polygon", {
-    points: "95,75 105,75 100,65",
-    fill: "rgba(59,130,246,0.5)"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-800 border border-blue-500/50 rounded-md p-4 text-center w-32 relative z-10 shadow-lg"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white text-sm"
-  }, "Extrude")), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col gap-2 items-center z-10"
-  }, /*#__PURE__*/React.createElement(ArrowRight, {
-    className: "w-5 h-5 text-blue-400"
-  }), /*#__PURE__*/React.createElement(ArrowLeft, {
-    className: "w-5 h-5 text-blue-400"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-800 border border-blue-500/50 rounded-md p-4 text-center w-48 relative z-10 shadow-lg"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white text-sm"
-  }, "Real-Time Laser Micrometry & AI Vision")), /*#__PURE__*/React.createElement(ArrowRight, {
-    className: "w-8 h-8 text-blue-500 z-10 hidden sm:block drop-shadow-[0_0_5px_rgba(59,130,246,0.8)]",
-    strokeWidth: 3
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-800 border border-blue-500/50 rounded-md p-4 text-center w-40 relative z-10 shadow-lg"
-  }, /*#__PURE__*/React.createElement("span", {
-    className: "font-bold text-white text-sm"
-  }, "Autonomous Micro-Adjustments"))))), /*#__PURE__*/React.createElement("div", {
-    className: "lg:w-1/3 flex flex-col gap-6"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-blue-500"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-blue-900/30 px-4 py-3 border-b border-slate-800"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white text-sm"
-  }, "Performance Impact:")), /*#__PURE__*/React.createElement("ul", {
-    className: "p-5 space-y-4 text-slate-300 text-sm"
-  }, /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 mr-3 flex-shrink-0"
-  }), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("strong", null, "40% improvement"), " in defect capture rates.")), /*#__PURE__*/React.createElement("li", {
-    className: "flex items-start"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 mr-3 flex-shrink-0"
-  }), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("strong", null, "50% reduction"), " in manual inspection time.")))), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-emerald-500"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-emerald-900/20 px-4 py-3 border-b border-slate-800"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white text-sm"
-  }, "Regulatory Advantage:")), /*#__PURE__*/React.createElement("p", {
-    className: "p-5 text-slate-300 text-sm leading-relaxed"
-  }, "Creates continuous digital inspection records, fortifying ISO 13485 and FDA compliance."))))), currentSlide === 12 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-br from-slate-900 to-slate-950 slide-fade-in overflow-y-auto custom-scrollbar"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl font-bold text-white mb-8 tracking-tight"
-  }, "AI Opportunity 3: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-purple-400"
-  }, "Process Optimization & Thermal Prediction")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 flex flex-col lg:flex-row gap-8 items-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "lg:w-1/2 w-full flex items-center justify-center relative min-h-[350px]"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "relative w-72 h-72"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 flex items-center justify-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "w-px h-full bg-slate-700"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "w-full h-px bg-slate-700 absolute rotate-[60deg]"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "w-full h-px bg-slate-700 absolute -rotate-[60deg]"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-1/4 border border-slate-700 rounded-full opacity-50"
-  }), /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 border border-slate-700 rounded-full opacity-50"
-  }), /*#__PURE__*/React.createElement("svg", {
-    className: "absolute inset-0 w-full h-full",
-    viewBox: "0 0 100 100"
-  }, /*#__PURE__*/React.createElement("polygon", {
-    points: "50,5 95,75 5,75",
-    fill: "none",
-    stroke: "#64748b",
-    strokeWidth: "1",
-    strokeDasharray: "4 4"
-  })), /*#__PURE__*/React.createElement("svg", {
-    className: "absolute inset-0 w-full h-full",
-    viewBox: "0 0 100 100"
-  }, /*#__PURE__*/React.createElement("polygon", {
-    points: "50,25 75,65 25,65",
-    fill: "rgba(168,85,247,0.1)",
-    stroke: "#c084fc",
-    strokeWidth: "2",
-    className: "drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "50",
-    cy: "25",
-    r: "2.5",
-    fill: "#e879f9",
-    className: "animate-pulse"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "75",
-    cy: "65",
-    r: "2.5",
-    fill: "#e879f9",
-    className: "animate-pulse"
-  }), /*#__PURE__*/React.createElement("circle", {
-    cx: "25",
-    cy: "65",
-    r: "2.5",
-    fill: "#e879f9",
-    className: "animate-pulse"
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "absolute top-0 left-1/2 -translate-x-1/2 -mt-4 text-sm font-bold text-slate-300 bg-slate-900 px-2"
-  }, "Temperature Profile"), /*#__PURE__*/React.createElement("div", {
-    className: "absolute bottom-0 right-0 -mb-4 -mr-4 text-sm font-bold text-slate-300 bg-slate-900 px-2"
-  }, "Melt Pressure"), /*#__PURE__*/React.createElement("div", {
-    className: "absolute bottom-0 left-0 -mb-4 -ml-4 text-sm font-bold text-slate-300 bg-slate-900 px-2"
-  }, "Pull Speed"), /*#__PURE__*/React.createElement("div", {
-    className: "absolute top-1/4 -left-12 flex flex-col items-end"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-sm font-bold text-slate-400"
-  }, "Human Setup Variance"), /*#__PURE__*/React.createElement(ArrowRight, {
-    className: "w-4 h-4 text-slate-500 mt-1 transform rotate-45"
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "absolute top-1/3 -right-16 flex flex-col items-start max-w-[150px]"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-sm font-bold text-purple-400 leading-tight mb-1"
-  }, "Optimized Process Window (AI Reinforcement Learning)"), /*#__PURE__*/React.createElement(ArrowLeft, {
-    className: "w-4 h-4 text-purple-500 transform -rotate-45"
-  }))), /*#__PURE__*/React.createElement("div", {
-    className: "lg:w-1/2 w-full flex flex-col gap-4"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-purple-500"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-purple-900/20 px-4 py-2 border-b border-slate-800"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white text-sm"
-  }, "Extrusion Optimization")), /*#__PURE__*/React.createElement("p", {
-    className: "p-4 text-slate-300 text-sm leading-relaxed"
-  }, "Reinforcement learning rapidly models high-dimensional parameters to minimize raw material waste during complex machine setups.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-purple-500"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-purple-900/20 px-4 py-2 border-b border-slate-800"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white text-sm"
-  }, "Reflow Bonding Prediction")), /*#__PURE__*/React.createElement("p", {
-    className: "p-4 text-slate-300 text-sm leading-relaxed"
-  }, "Predicts ", /*#__PURE__*/React.createElement("strong", null, "optimal thermal profiles"), " for bonding incompatible polymers based on joint geometry\u2014without destructive testing.")), /*#__PURE__*/React.createElement("div", {
-    className: "bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-lg border-l-4 border-l-purple-500"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "bg-purple-900/20 px-4 py-2 border-b border-slate-800"
-  }, /*#__PURE__*/React.createElement("h4", {
-    className: "font-bold text-white text-sm"
-  }, "Generative DFM")), /*#__PURE__*/React.createElement("p", {
-    className: "p-4 text-slate-300 text-sm leading-relaxed"
-  }, "AI-assisted Design for Manufacturability accelerates OEM prototyping in the Irvine lab by simulating production feasibility."))))), currentSlide === 13 && /*#__PURE__*/React.createElement("div", {
-    className: "absolute inset-0 p-8 md:p-12 flex flex-col bg-gradient-to-br from-slate-900 to-slate-950 slide-fade-in overflow-y-auto custom-scrollbar"
-  }, /*#__PURE__*/React.createElement("h2", {
-    className: "text-3xl font-bold text-white mb-8 tracking-tight"
-  }, "AI Opportunity 4: ", /*#__PURE__*/React.createElement("span", {
-    className: "text-teal-400"
-  }, "Multi-Site Supply Chain Intelligence")), /*#__PURE__*/React.createElement("div", {
-    className: "flex-1 flex flex-col justify-between"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col md:flex-row items-center justify-between gap-4 mt-8 px-4 relative z-10"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col items-center relative w-full md:w-1/3"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-12 bg-teal-900/80 border border-teal-500 rounded px-3 py-1.5 text-xs font-bold text-teal-300 whitespace-nowrap shadow-lg backdrop-blur"
-  }, "Dynamic Safety Stock Positioned"), /*#__PURE__*/React.createElement("div", {
-    className: "w-24 h-24 bg-slate-800 rounded-2xl transform rotate-45 border-2 border-slate-600 flex items-center justify-center shadow-2xl overflow-hidden group"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "transform -rotate-45 text-slate-300 flex flex-col items-center group-hover:text-teal-400 transition-colors"
-  }, /*#__PURE__*/React.createElement(Building2, {
-    className: "w-8 h-8 mb-1"
-  }))), /*#__PURE__*/React.createElement("h4", {
-    className: "text-white font-bold mt-8 text-center text-lg"
-  }, "Singapore")), /*#__PURE__*/React.createElement("div", {
-    className: "hidden md:flex flex-col items-center flex-shrink-0 w-32 relative"
-  }, /*#__PURE__*/React.createElement(ArrowRight, {
-    className: "w-8 h-8 text-teal-500 mb-1"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-slate-400 text-center font-medium absolute top-8 whitespace-nowrap"
-  }, "Raw Polymers", /*#__PURE__*/React.createElement("br", null), "& PTFE Liners")), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col items-center relative w-full md:w-1/3 mt-12 md:mt-0"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-12 bg-blue-900/80 border border-blue-500 rounded px-3 py-1.5 text-xs font-bold text-blue-300 whitespace-nowrap shadow-lg backdrop-blur"
-  }, "AI Optimized Route"), /*#__PURE__*/React.createElement("div", {
-    className: "w-24 h-24 bg-slate-800 rounded-2xl transform rotate-45 border-2 border-slate-600 flex items-center justify-center shadow-2xl overflow-hidden group"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "transform -rotate-45 text-slate-300 flex flex-col items-center group-hover:text-blue-400 transition-colors"
-  }, /*#__PURE__*/React.createElement(Map, {
-    className: "w-8 h-8 mb-1"
-  }))), /*#__PURE__*/React.createElement("h4", {
-    className: "text-white font-bold mt-8 text-center text-lg"
-  }, "Xiamen, China &", /*#__PURE__*/React.createElement("br", null), "Bac Ninh, Vietnam")), /*#__PURE__*/React.createElement("div", {
-    className: "hidden md:flex flex-col items-center flex-shrink-0 w-32 relative"
-  }, /*#__PURE__*/React.createElement(ArrowRight, {
-    className: "w-8 h-8 text-blue-500 mb-1"
-  }), /*#__PURE__*/React.createElement("span", {
-    className: "text-xs text-slate-400 text-center font-medium absolute top-8 whitespace-nowrap"
-  }, "Finished Assembled", /*#__PURE__*/React.createElement("br", null), "Catheters")), /*#__PURE__*/React.createElement("div", {
-    className: "flex flex-col items-center relative w-full md:w-1/3 mt-12 md:mt-0"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "absolute -top-12 bg-purple-900/80 border border-purple-500 rounded px-3 py-1.5 text-xs font-bold text-purple-300 whitespace-nowrap shadow-lg backdrop-blur"
-  }, "EPE Customs Automated"), /*#__PURE__*/React.createElement("div", {
-    className: "w-24 h-24 bg-slate-800 rounded-2xl transform rotate-45 border-2 border-slate-600 flex items-center justify-center shadow-2xl overflow-hidden group"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "transform -rotate-45 text-slate-300 flex flex-col items-center group-hover:text-purple-400 transition-colors"
-  }, /*#__PURE__*/React.createElement(Globe, {
-    className: "w-8 h-8 mb-1"
-  }))), /*#__PURE__*/React.createElement("h4", {
-    className: "text-white font-bold mt-8 text-center text-lg"
-  }, "Global OEM", /*#__PURE__*/React.createElement("br", null), "Customers"))), /*#__PURE__*/React.createElement("div", {
-    className: "grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 bg-slate-900/50 rounded-2xl border border-slate-800 p-2"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "p-6 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-slate-500 text-sm font-bold uppercase tracking-wider mb-2 text-center md:text-left"
-  }, "Complexity:"), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-300 text-sm leading-relaxed text-center md:text-left"
-  }, "Flawlessly coordinating specialty materials across three countries.")), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 border-b md:border-b-0 md:border-r border-slate-800 flex flex-col justify-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-teal-400 text-sm font-bold uppercase tracking-wider mb-2 text-center md:text-left"
-  }, "Impact:"), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-300 text-sm leading-relaxed text-center md:text-left"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "text-white"
-  }, "15-25% reduction"), " in inventory carrying costs ($200K-$500K).")), /*#__PURE__*/React.createElement("div", {
-    className: "p-6 flex flex-col justify-center"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "text-blue-400 text-sm font-bold uppercase tracking-wider mb-2 text-center md:text-left"
-  }, "Impact:"), /*#__PURE__*/React.createElement("p", {
-    className: "text-slate-300 text-sm leading-relaxed text-center md:text-left"
-  }, /*#__PURE__*/React.createElement("strong", {
-    className: "text-white"
-  }, "10% decrease"), " in global shipping costs.")))))), /*#__PURE__*/React.createElement("div", {
     className: "bg-slate-950 p-4 border-t border-slate-800 flex items-center justify-between"
   }, /*#__PURE__*/React.createElement("div", {
     className: "flex-1 mr-8 hidden md:block"

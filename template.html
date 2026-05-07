@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<!--
+  ┌─────────────────────────────────────────────────────────────────┐
+  │  STRATEGIC INTELLIGENCE PORTAL  —  Reusable Template           │
+  │                                                                 │
+  │  HOW TO USE                                                     │
+  │  1. Edit the PORTAL_CONFIG object below (the only section       │
+  │     you need to touch for most customisations).                 │
+  │  2. Drop your logo at  assets/logo.png  (any PNG/SVG works).   │
+  │  3. Replace slide images in  assets/The_AI_Powered_CDMO/          │
+  │     Slide1.JPG … SlideN.JPG  (or update pitchDeck.slideDir /    │
+  │     slideCount in config to point to your own slide folder).     │
+  │  4. Replace  assets/video.mp4  and  assets/audio.mp3           │
+  │     with your own media files (or remove the media section).    │
+  │  5. Open the file in a browser — no build step required.        │
+  └─────────────────────────────────────────────────────────────────┘
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Title is set dynamically from PORTAL_CONFIG.meta.pageTitle -->
+  <title>Strategic Intelligence Portal</title>
+
+  <!-- Tailwind (utility-first CSS) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
+
+  <!-- ES Module import map — maps bare specifiers to CDN URLs -->
+  <script type="importmap">
+    {
+      "imports": {
+        "react":              "https://esm.sh/react@18.2.0",
+        "react-dom/client":   "https://esm.sh/react-dom@18.2.0/client",
+        "lucide-react":       "https://esm.sh/lucide-react@0.292.0",
+        "gsap":               "https://esm.sh/gsap@3.13.0",
+        "gsap/ScrollTrigger": "https://esm.sh/gsap@3.13.0/ScrollTrigger",
+        "gsap/Observer":      "https://esm.sh/gsap@3.13.0/Observer",
+        "gsap/CustomEase":    "https://esm.sh/gsap@3.13.0/CustomEase",
+        "lenis":              "https://esm.sh/lenis@1.1.20"
+      }
+    }
+  </script>
+
+  <!-- Preload critical modules -->
+  <link rel="modulepreload" href="https://esm.sh/react@18.2.0">
+  <link rel="modulepreload" href="https://esm.sh/react-dom@18.2.0/client">
+  <link rel="modulepreload" href="https://esm.sh/lucide-react@0.292.0">
+  <link rel="modulepreload" href="https://esm.sh/gsap@3.13.0">
+  <link rel="modulepreload" href="https://esm.sh/lenis@1.1.20">
+
+  <style>
+    /* ─── DESIGN TOKENS ─────────────────────────────────────────── */
+    :root {
+      --teal:        #2dd4bf;
+      --blue:        #3b82f6;
+      --bg:          #020617;
+      --teal-glow:   rgba(45,212,191,.40);
+      --blue-glow:   rgba(59,130,246,.40);
+      --teal-dim:    rgba(45,212,191,.12);
+      --blue-dim:    rgba(59,130,246,.12);
+      --surface-1:   #0f172a;
+      --surface-2:   #1e293b;
+      --shadow-sm:   0 1px 3px rgba(0,0,0,.40), 0 1px 2px rgba(0,0,0,.28);
+      --shadow-md:   0 4px 16px rgba(0,0,0,.50), 0 2px 6px rgba(0,0,0,.22);
+      --shadow-lg:   0 8px 32px rgba(0,0,0,.60), 0 4px 12px rgba(0,0,0,.28);
+      --shadow-teal: 0 0 24px rgba(45,212,191,.18), 0 0 8px rgba(45,212,191,.10);
+      --shadow-blue: 0 0 24px rgba(59,130,246,.18), 0 0 8px rgba(59,130,246,.10);
+    }
+
+    /* ─── BASE ──────────────────────────────────────────────────── */
+    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    html, body { background-color: var(--bg); }
+    body { font-family: 'Satoshi', system-ui, sans-serif; overflow-x: hidden; }
+    h1,h2,h3,h4,h5,h6,.logo-text { font-family: 'Outfit', sans-serif; letter-spacing: -.025em; }
+    h1 { letter-spacing: -.04em; line-height: 1; }
+    .font-mono, code { font-family: 'JetBrains Mono', monospace; }
+    ::selection { background: rgba(45,212,191,.25); color: #e2e8f0; }
+    :focus-visible { outline: 2px solid rgba(45,212,191,.70); outline-offset: 3px; }
+
+    /* ─── LENIS SMOOTH SCROLL ───────────────────────────────────── */
+    html.lenis { height: auto; }
+    html.lenis.lenis-smooth { scroll-behavior: auto !important; }
+    html.lenis.lenis-stopped { overflow: hidden; }
+
+    /* ─── PRELOADER ─────────────────────────────────────────────── */
+    #preloader {
+      position: fixed; inset: 0; z-index: 9998;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity .8s cubic-bezier(.65,0,.35,1), visibility .8s;
+    }
+    #preloader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+    #preloader .pl-inner {
+      display: flex; flex-direction: column; align-items: center; gap: 1.5rem;
+    }
+    #preloader .pl-logo {
+      height: 4rem; width: auto; object-fit: contain;
+      opacity: 0; animation: plFade .6s .1s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    #preloader .pl-mark {
+      font-family: 'Outfit', sans-serif; font-weight: 900;
+      font-size: clamp(3rem,9vw,6rem); letter-spacing: -.06em;
+      color: #fff; line-height: 1;
+      display: flex; align-items: baseline; gap: .4rem;
+      opacity: 0; animation: plFade .6s .1s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    #preloader .pl-dot {
+      width: .55em; height: .55em; border-radius: 999px;
+      background: linear-gradient(135deg,var(--teal),var(--blue));
+      transform: translateY(-.05em);
+      animation: plPulse 1.4s ease-in-out infinite;
+    }
+    #preloader .pl-bar {
+      position: absolute; bottom: 0; left: 0; height: 2px;
+      background: linear-gradient(90deg,var(--teal),var(--blue));
+      width: 0%; animation: plProg 1.6s .2s cubic-bezier(.65,0,.35,1) forwards;
+    }
+    @keyframes plFade  { to { opacity: 1; } }
+    @keyframes plPulse { 0%,100%{opacity:1;transform:translateY(-.05em) scale(1)}50%{opacity:.5;transform:translateY(-.05em) scale(.85)} }
+    @keyframes plProg  { to { width: 100%; } }
+
+    /* ─── AURORA BACKGROUND ─────────────────────────────────────── */
+    .aurora { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+    .aurora::before, .aurora::after {
+      content: ''; position: absolute; border-radius: 50%; filter: blur(80px); opacity: .35;
+    }
+    .aurora::before {
+      width: 60vw; height: 60vw; left: -20vw; top: -20vw;
+      background: radial-gradient(circle, rgba(45,212,191,.25), transparent 60%);
+      animation: auroraDrift 22s ease-in-out infinite alternate;
+    }
+    .aurora::after {
+      width: 70vw; height: 70vw; right: -25vw; bottom: -30vw;
+      background: radial-gradient(circle, rgba(59,130,246,.22), transparent 60%);
+      animation: auroraDrift 28s ease-in-out -8s infinite alternate-reverse;
+    }
+    @keyframes auroraDrift {
+      0%   { transform: translate(0,0) scale(1); }
+      50%  { transform: translate(8vw,6vh) scale(1.1); }
+      100% { transform: translate(-6vw,-4vh) scale(.95); }
+    }
+
+    /* ─── GRAIN OVERLAY ─────────────────────────────────────────── */
+    .grain-overlay {
+      position: fixed; inset: 0; z-index: 9997; pointer-events: none;
+      opacity: .06; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ─── GRID PATTERN ──────────────────────────────────────────── */
+    .bg-grid-pattern {
+      background-size: 40px 40px;
+      background-image:
+        linear-gradient(to right,  rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.03) 1px, transparent 1px);
+    }
+
+    /* ─── SCROLLBAR ─────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 0; background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+    /* ─── SCROLL PROGRESS ───────────────────────────────────────── */
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position:  200% center; }
+    }
+    .scroll-prog {
+      position: fixed; top: 0; left: 0; height: 2px; width: 0;
+      background: linear-gradient(90deg, var(--teal), var(--blue), var(--teal));
+      background-size: 200% auto;
+      animation: shimmer 3s linear infinite;
+      z-index: 100; transform-origin: left;
+      box-shadow: 0 0 14px rgba(45,212,191,.65);
+    }
+
+    /* ─── SECTION DOT NAV ───────────────────────────────────────── */
+    .section-dots {
+      position: fixed; right: 1.5rem; top: 50%; transform: translateY(-50%);
+      z-index: 40; display: none; flex-direction: column; gap: .85rem;
+    }
+    @media (min-width: 1024px) { .section-dots { display: flex; } }
+    .section-dots a {
+      position: relative; width: 8px; height: 8px; border-radius: 999px;
+      background: rgba(148,163,184,.3); transition: all .3s ease;
+    }
+    .section-dots a::before {
+      content: attr(data-label); position: absolute; right: 18px; top: 50%;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
+      color: rgba(148,163,184,.6); white-space: nowrap; letter-spacing: .1em;
+      text-transform: uppercase; opacity: 0;
+      transition: opacity .25s ease, transform .25s ease;
+      transform: translate(8px,-50%); pointer-events: none;
+    }
+    .section-dots a:hover { background: var(--teal); transform: scale(1.4); }
+    .section-dots a:hover::before { opacity: 1; transform: translate(0,-50%); }
+    .section-dots a.is-active { background: var(--teal); box-shadow: 0 0 12px var(--teal); transform: scale(1.3); }
+
+    /* ─── NAV ───────────────────────────────────────────────────── */
+    nav.sticky, nav[class*="sticky"] {
+      backdrop-filter: blur(28px) saturate(200%) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+      box-shadow: 0 1px 0 rgba(45,212,191,.07), 0 4px 32px rgba(0,0,0,.55) !important;
+    }
+    .nav-logo-img {
+      height: 2.2rem; width: auto; object-fit: contain;
+      filter: drop-shadow(0 0 6px rgba(45,212,191,.35));
+    }
+
+    /* ─── REVEAL ANIMATIONS ─────────────────────────────────────── */
+    [data-reveal] { opacity: 0; transform: translateY(40px); will-change: opacity, transform; }
+    [data-reveal-stagger] > * { opacity: 0; transform: translateY(30px); }
+    @keyframes slideFadeIn {
+      from { opacity: 0; transform: translateX(24px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    .slide-fade-in { animation: slideFadeIn .45s cubic-bezier(.16,1,.3,1) both; }
+
+    /* ─── METRIC CARD ───────────────────────────────────────────── */
+    .metric-card {
+      position: relative;
+      transition: transform .4s cubic-bezier(.16,1,.3,1),
+                  border-color .35s ease, box-shadow .35s ease;
+    }
+    .metric-card::before {
+      content: ''; position: absolute; inset: -1px; border-radius: inherit;
+      background: linear-gradient(135deg, rgba(45,212,191,.45) 0%, transparent 45%, rgba(59,130,246,.30) 100%);
+      opacity: 0; transition: opacity .45s ease; z-index: -1; pointer-events: none;
+    }
+    .metric-card::after {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(45,212,191,.7), transparent);
+      opacity: 0; transition: opacity .4s ease;
+    }
+    .metric-card:hover::before { opacity: 1; }
+    .metric-card:hover::after  { opacity: 1; }
+    .metric-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 0 0 1px rgba(45,212,191,.30), var(--shadow-lg), var(--shadow-teal);
+    }
+
+    /* ─── CARD UTILITIES ────────────────────────────────────────── */
+    .ap-card-hover { transition: transform .5s cubic-bezier(.16,1,.3,1), border-color .4s ease, box-shadow .4s ease; }
+    .ap-card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(45,212,191,.12); }
+
+    /* ─── HERO CHIP ─────────────────────────────────────────────── */
+    [data-anim="hero-chip"] { transition: all .3s cubic-bezier(.16,1,.3,1) !important; }
+    [data-anim="hero-chip"]:hover {
+      border-color: rgba(45,212,191,.45) !important;
+      background: rgba(15,23,42,.92) !important;
+      box-shadow: 0 0 14px rgba(45,212,191,.12), var(--shadow-md) !important;
+      transform: translateY(-2px);
+    }
+
+    /* ─── H2 UNDERLINE REVEAL ───────────────────────────────────── */
+    main section h2 { position: relative; }
+    main section h2[data-h2-line]::after {
+      content: ''; position: absolute; left: 0; bottom: -8px; height: 2px; width: 100%;
+      background: linear-gradient(90deg, var(--teal), var(--blue), transparent 70%);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .9s cubic-bezier(.16,1,.3,1);
+    }
+    main section h2[data-h2-line].is-in::after { transform: scaleX(1); }
+
+    /* ─── SLIDE IMAGES ──────────────────────────────────────────── */
+    .slide-img-frame {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      background: #020617;
+    }
+    .slide-img-frame img { width: 100%; height: 100%; object-fit: contain; }
+
+    /* ─── SECTION BADGE PILL ────────────────────────────────────── */
+    .ap-badge {
+      display: inline-flex; align-items: center; gap: .375rem;
+      padding: .2rem .75rem; border-radius: 9999px;
+      background: rgba(45,212,191,.06); border: 1px solid rgba(45,212,191,.18);
+      color: var(--teal); font-family: 'JetBrains Mono', monospace;
+      font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .14em;
+    }
+
+    /* ─── WAVE ANIMATION ────────────────────────────────────────── */
+    .wave-bar { transition: height .18s cubic-bezier(.16,1,.3,1); }
+    [data-wave][data-playing="1"] .wave-bar { animation: waveBeat .9s ease-in-out infinite; }
+    [data-wave][data-playing="1"] .wave-bar:nth-child(2n)   { animation-delay: .12s; }
+    [data-wave][data-playing="1"] .wave-bar:nth-child(3n)   { animation-delay: .24s; }
+    [data-wave][data-playing="1"] .wave-bar:nth-child(4n)   { animation-delay: .08s; }
+    [data-wave][data-playing="1"] .wave-bar:nth-child(5n)   { animation-delay: .32s; }
+    [data-wave] .wave-bar { transform-origin: bottom; }
+    @keyframes waveBeat { 0%,100%{transform:scaleY(.45)} 50%{transform:scaleY(1.25)} }
+
+    /* ─── CAROUSEL CONTROLS ─────────────────────────────────────── */
+    [data-slide-prev], [data-slide-next] { transition: all .3s cubic-bezier(.16,1,.3,1) !important; }
+    [data-slide-prev]:hover:not(:disabled),
+    [data-slide-next]:hover:not(:disabled) {
+      box-shadow: 0 0 16px rgba(45,212,191,.25) !important;
+      border-color: rgba(45,212,191,.40) !important;
+    }
+
+    /* ─── FOOTER ────────────────────────────────────────────────── */
+    footer { position: relative; }
+    footer::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(45,212,191,.28), rgba(59,130,246,.22), transparent);
+    }
+
+    /* ─── REDUCED MOTION ────────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; animation-iteration-count: 1 !important; }
+      .aurora::before, .aurora::after { animation: none !important; }
+      [data-reveal], [data-reveal-stagger] > * { opacity: 1 !important; transform: none !important; }
+    }
+  </style>
+</head>
+<body class="text-slate-300 antialiased">
+
+  <!-- ── Preloader ───────────────────────────────────────────────── -->
+  <!-- Shows your logo (assets/logo.png) while the app bootstraps.   -->
+  <!-- Falls back to PORTAL_CONFIG.brand.abbreviation text.          -->
+  <div id="preloader">
+    <div class="pl-inner">
+      <img src="assets/logo.png" alt="Logo" class="pl-logo"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="pl-mark" style="display:none">
+        <!-- Brand abbreviation shown when logo.png is missing -->
+        <span id="pl-abbr">AP</span><span class="pl-dot"></span>
+      </div>
+    </div>
+    <div class="pl-bar"></div>
+  </div>
+
+  <script>
+    // Defensive failsafe: hide preloader after 2 s even if React fails.
+    setTimeout(function() {
+      var pl = document.getElementById('preloader');
+      if (pl && !pl.classList.contains('done')) pl.classList.add('done');
+    }, 2000);
+    window.addEventListener('error', function(e) {
+      console.error('[portal] runtime error:', e.error || e.message);
+    });
+  </script>
+
+  <!-- Ambient layers -->
+  <div class="aurora"         aria-hidden="true"></div>
+  <div class="grain-overlay"  aria-hidden="true"></div>
+  <div class="scroll-prog"    id="scrollProg"   aria-hidden="true"></div>
+  <nav class="section-dots"   id="sectionDots"  aria-label="Section navigation"></nav>
+
+  <div id="root"></div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       REACT APPLICATION
+       All customisation is done inside PORTAL_CONFIG below.
+  ════════════════════════════════════════════════════════════════ -->
+  <script type="module">
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createRoot } from 'react-dom/client';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { Observer } from 'gsap/Observer';
+import { CustomEase } from 'gsap/CustomEase';
+import Lenis from 'lenis';
+import {
+  Activity, Globe, Shield, Cpu, Layers, Crosshair, Factory, BarChart3,
+  Microscope, ShieldCheck, Map, Building2, Briefcase, Settings, MapPin,
+  Users, Target, HeartPulse, Brain, TrendingUp, GitMerge, LineChart,
+  Calendar, Play, Pause, ChevronRight, ChevronDown, ChevronLeft,
+  Menu, X, ArrowRight, ArrowDown, Check, AlertTriangle, AlertCircle,
+  CheckCircle2, Wrench, Eye, Rocket, Lock, Merge, FileCheck2,
+  Lightbulb, FileDigit, Filter, Gauge, Zap, TrendingDown,
+  RefreshCw, Scale, BarChart2
+} from 'lucide-react';
+
+gsap.registerPlugin(ScrollTrigger, Observer, CustomEase);
+CustomEase.create('apEase', '0.16, 1, 0.3, 1');
+
+// ════════════════════════════════════════════════════════════════════
+//  PORTAL CONFIGURATION  ← edit everything here
+// ════════════════════════════════════════════════════════════════════
+// Every visible string, colour accent, slide count, location, metric,
+// and link is controlled from this single object. The components below
+// consume it — you shouldn't need to touch them for basic changes.
+const PORTAL_CONFIG = {
+
+  // ── Brand & Page Meta ──────────────────────────────────────────
+  brand: {
+    abbreviation: 'AP',          // Preloader fallback text (2-3 chars)
+    name:         'GoodAI',      // Main name shown in the nav (gradient)
+    tagline:      'AP Tech',     // Secondary label right of the divider
+    pageTitle:    'AP Technologies | Strategic Blueprint Portal',
+  },
+
+  // ── Navigation links ──────────────────────────────────────────
+  // 'id' must match a <section id="..."> in the rendered output.
+  nav: [
+    { id: 'overview',     label: 'Executive Summary' },
+    { id: 'pitch-deck',   label: 'Presentation Deck' },
+    { id: 'capabilities', label: 'Engineering'        },
+    { id: 'footprint',    label: 'Global Footprint'   },
+    { id: 'strategy',     label: 'AI Strategy'        },
+    { id: 'briefing',     label: 'Board Briefing'     },
+    { id: 'ecosystem',    label: 'Ecosystem Map'      },
+  ],
+
+  // ── Hero section ───────────────────────────────────────────────
+  hero: {
+    badge:       'Tier-1 MedTech CDMO',
+    badgeIcon:   ShieldCheck,
+    headline:    'Precision Medical Manufacturing at',
+    highlight:   'Global Scale.',
+    description: 'Transitioning from a boutique extruder to a vertically integrated, multi-continent platform. Derisking the global supply chain for Class II & III medical devices.',
+    chips: [
+      { label: '±0.0003″ Tolerances',   icon: Crosshair, color: 'teal'   },
+      { label: '4-Continent Footprint', icon: Globe,     color: 'blue'   },
+      { label: 'AGIC Capital Backed',   icon: BarChart3, color: 'purple' },
+    ],
+  },
+
+  // ── KPI metric cards (4 shown below hero) ─────────────────────
+  // target: number used for the animated counter
+  metrics: [
+    { label: 'Minimum CPK',         target: 1.33, decimals: 2, prefix: '',  suffix: '',   sub: '4-Sigma Quality Level'      },
+    { label: 'Cleanroom Space',     target: 110,  decimals: 0, prefix: '',  suffix: 'k+', sub: 'Sq. Ft. ISO Class 7 & 8'   },
+    { label: 'Estimated Capacity',  target: 66,   decimals: 0, prefix: '$', suffix: 'M',  sub: 'Annual Theoretical Limit'   },
+    { label: 'Concurrent Projects', target: 100,  decimals: 0, prefix: '',  suffix: '+',  sub: 'Active NPI & Scaling'       },
+  ],
+
+  // ── Media section ──────────────────────────────────────────────
+  media: {
+    sectionTitle: 'Executive Media & Briefings',
+    video: {
+      src:   'assets/video.mp4',
+      title: 'Executive Overview Video',
+    },
+    audio: {
+      src:          'assets/audio.mp3',
+      sectionLabel: 'Audio Intelligence Briefing',
+      title:        'AGIC Capital Thesis',
+      description:  'Listen to the strategic teardown of the 2023 growth equity injection and the subsequent scaling of the Vietnam manufacturing footprint.',
+      duration:     '04:12',
+      total:        '18:45',
+    },
+  },
+
+  // ── Pitch deck ─────────────────────────────────────────────────
+  // Slide images are loaded from:  slideDir + 'Slide' + N + '.JPG'
+  // Replace the JPGs in that folder with your own (same naming).
+  pitchDeck: {
+    sectionTitle: 'Strategic Roadmap',
+    description:  'AI automation integration and global expansion thesis.',
+    slideDir:     'assets/The_AI_Powered_CDMO/',
+    slideCount:   13,
+    // Takeaway shown in the footer bar for each slide (index 1 = slide 1)
+    takeaways: [
+      '',  // index 0 unused
+      'AP Tech has the physical footprint and market positioning; AI is the catalyst to scale it efficiently.',
+      'AP Tech\'s distributed footprint offers OEMs Western-grade R&D with tariff-insulated Asian labor economics.',
+      'Owning the entire production lifecycle eliminates third-party handoffs, securing sticky, high-margin relationships.',
+      'Explosive demand for tariff-exempt manufacturing cannot be met by simply adding headcount; technological leverage is required.',
+      'AI transforms AP Tech\'s localized, human-dependent brilliance into a globally scalable, automated platform.',
+      'Predictive maintenance transitions AP Tech to proactive capacity protection, yielding immediate half-million-dollar savings.',
+      'The new Vietnam facility offers a rare blank-slate opportunity to build a fully AI-native medical manufacturing hub.',
+      'AI integration decisively breaks the traditional industry compromise between cost and quality.',
+      'AI integration is a phased, self-funding journey — starting with infrastructure and quick-ROI maintenance.',
+      'AI is the definitive growth multiplier that will fully realize the potential of AGIC Capital\'s investment.',
+      'AI-powered machine vision guarantees sub-micron quality at high-volume scale, dramatically reducing field failure risk.',
+      'Process AI slashes material waste and accelerates R&D cycles, cementing AP Tech as a fast-to-market partner.',
+      'An intelligent supply chain backbone turns complex multi-continent logistics into a margin-generating asset.',
+    ],
+  },
+
+  // ── Capabilities section (3 cards) ────────────────────────────
+  capabilities: {
+    badge:       'Core Technology',
+    description: 'Operating at the absolute threshold of current manufacturing capabilities. Mastering advanced polymer synergy for complex diagnostic, neurology, and cardiovascular applications.',
+    cards: [
+      {
+        icon: Microscope, iconColor: 'text-teal-400', hoverBorder: 'hover:border-teal-500/50',
+        title:       'Ultra-Precision Extrusion',
+        description: 'Producing ultra-thin wall extrusions down to 0.0005 inches, with overall dimensional tolerances of ±0.0003 inches.',
+        bullets:     ['Wall thickness variation < 5%', 'Inner Diameter (ID) down to 0.01″', 'CPK ≥ 1.33 strictly maintained'],
+        bulletColor: 'teal-500',
+      },
+      {
+        icon: Layers, iconColor: 'text-blue-400', hoverBorder: 'hover:border-blue-500/50',
+        title:       'Multi-Layer & PTFE',
+        description: 'Industry-leading etched PTFE liners for unmatched lubricity, chemically bridged via LLDPE to Pebax® outer jackets without delamination.',
+        bullets:     ['Multi-lumen & asymmetric profiles', 'Over 15 exotic polymers processed', 'High-density radiopaque compounding'],
+        bulletColor: 'blue-500',
+      },
+      {
+        icon: Factory, iconColor: 'text-purple-400', hoverBorder: 'hover:border-purple-500/50',
+        title:       'Vertical Integration',
+        description: 'From raw polymer compounding to secondary finishing (braiding, coiling, laser marking) and final sterile packaging within a single ecosystem.',
+        bullets:     ['Automated knitting clusters', 'Picosecond laser ablation', 'Reflow bonding & tip forming'],
+        bulletColor: 'purple-500',
+      },
+    ],
+  },
+
+  // ── Global Footprint section ───────────────────────────────────
+  footprint: {
+    headline:    'Geopolitical Resilience',
+    badge:       'The "China-Plus-One" Architecture',
+    description: 'In a landscape defined by severe 2025/2026 trade fragmentation, single-node supply chains present an existential threat. AP Technologies operates a fully insulated bypass via its Bac Ninh, Vietnam and Singapore facilities.',
+    sub:         'Western OEMs achieve the cost benefits of Asian manufacturing without absorbing US-China trade friction, seamlessly routing through tariff-exempt export corridors.',
+    locations: [
+      { name: 'Singapore (HQ)',    tag: 'ISO 13485',     tagColor: 'teal',    dot: 'bg-teal-500',    desc: 'Corporate governance, advanced R&D, and multi-component assembly hub.' },
+      { name: 'Irvine, CA (USA)', tag: null,             tagColor: '',        dot: 'bg-blue-500',    desc: 'Rapid prototyping catheter lab. Synchronous engineering with Western OEMs.' },
+      { name: 'Xiamen, China',    tag: 'ISO Class 7/8',  tagColor: 'purple',  dot: 'bg-purple-500',  desc: 'Mature, high-volume multi-lumen extrusion hub processing millions of components.' },
+      { name: 'Bac Ninh, Vietnam',tag: 'EPE Status',     tagColor: 'emerald', dot: 'bg-emerald-500', desc: '130,000+ sq ft Phase 1 expansion. Tariff-exempt assembly & secondary processing.' },
+    ],
+  },
+
+  // ── AI Strategy section ────────────────────────────────────────
+  strategy: {
+    headline:    'Operational Efficiency Analysis',
+    subheadline: 'AI-Driven Transformation in High-Precision Catheter Manufacturing',
+    description: 'Transitioning from a legacy model of "vertical integration" physical scale to an "AI-integrated" digital moat.',
+    pillars: [
+      {
+        numeral: 'I', title: 'Asset Reliability',
+        icon: Wrench, iconBg: 'bg-blue-500/10', iconColor: 'text-blue-400',
+        body: 'Predictive Maintenance (PdM) across 10+ extrusion lines ensures real-time monitoring of variables like fiber tension and spindle bearing vibration — correcting degradation before they manifest as defects.',
+        tableHeaders: ['Current State (Reactive)', 'AI-Enhanced Future'],
+        tableRows: [
+          ['Fixed schedules / Post-failure', 'Sensor data & prediction'],
+          ['Unplanned downtime',             'Planned & optimized'],
+          ['Risk of "asymmetrical wall"',    'Real-time tracking'],
+        ],
+        savings: [
+          { value: '$150k – $250k', label: 'Downtime Reduction',    sub: 'Eliminating cascading delays.' },
+          { value: '$90k – $180k',  label: 'Quality Scrap Reduction',sub: 'Preventing runs on degrading machinery.' },
+          { value: '$80k – $120k',  label: 'Labor Efficiency',      sub: 'Optimized maintenance technician deployment.' },
+          { value: '~$35k',         label: 'Emergency Repair',      sub: 'Avoidance of expedited parts and overtime.' },
+        ],
+      },
+      {
+        numeral: 'II', title: 'Machine Vision & QC',
+        icon: Eye, iconBg: 'bg-purple-500/10', iconColor: 'text-purple-400',
+        body: 'AI-powered machine vision detects invisible surface irregularities, achieving a 40% improvement in defect capture rates and a 50% reduction in human inspection time.',
+      },
+      {
+        numeral: 'III', title: 'NPI Acceleration',
+        icon: Rocket, iconBg: 'bg-orange-500/10', iconColor: 'text-orange-400',
+        body: 'AI systematizes the engineering process, capturing tacit knowledge of 70+ engineers to aggressively capture high-margin OEM contracts with faster New Product Introduction cycles.',
+      },
+    ],
+    yields: [
+      { value: '15', suffix: '%',    label: 'On-Time Delivery', sub: 'Improvement via integrated supply chain intelligence.' },
+      { value: '10', suffix: '%',    label: 'Logistics Savings', sub: 'Reduction in global shipping costs.' },
+      { value: '$49.5M+', suffix: '', label: 'Capacity Yield',  sub: 'Driving toward max theoretical cleanroom bounds.' },
+    ],
+    lockIn: {
+      title: 'The "Structural Lock-in"',
+      body:  'Validation for Class II/III components requires 12 to 36 months. Once an OEM validates an AI-optimized process, the relationship solidifies. By integrating intelligence into the manufacturing floor, AP Technologies transforms from a commoditized supplier into an unbreakable, validated node in the customer\'s global supply chain.',
+    },
+  },
+
+  // ── Board Briefing section ─────────────────────────────────────
+  briefing: {
+    badge:       'Confidential Board Briefing • Horizon 2026',
+    badgeIcon:   AlertTriangle,
+    headline:    'Global Scaling & Geopolitical Resilience',
+    description: 'Navigating the transition from an Asia-centric founder-led manufacturer to an institutionally-backed global commercial platform.',
+    strengths: [
+      { title: 'Technical Moat',       body: 'Ultra-thin wall extrusions (0.0005″), CPK 1.33, and specialized PTFE liners with sub-micron tolerances.' },
+      { title: 'Vertical Integration', body: 'End-to-end capabilities from polymer compounding to multi-lumen extrusion and sterile packaging.' },
+      { title: 'Geographic Footprint', body: '4-site network (110k+ sq. ft.) enabling Irvine R&D scaling into high-volume Asian production.' },
+      { title: 'Institutional Backing',body: '2023 AGIC Capital ($2.2B AUM) growth equity provides aggressive M&A bandwidth.' },
+    ],
+    risks: [
+      { title: 'Regulatory Bottlenecks', body: '130k sq. ft. Vietnam facility pending ISO 13485 certification, restricting Class II/III Western exports.' },
+      { title: 'Revenue Concentration', body: 'High dependency on a select few "blue-chip" OEMs.' },
+      { title: 'Geopolitical Tariffs',  body: 'July 2025 implementation of 20%–40% base tariffs mandates flawless Vietnam execution.' },
+      { title: 'Scale Disparity',       body: 'Mid-tier revenue ($50M–$66M) limits ability to absorb massive single-OEM contracts vs. Integer ($1.85B).' },
+    ],
+    options: [
+      {
+        letter: 'A', color: 'blue', icon: Merge,
+        title: 'Aggressive Inorganic Growth',
+        body:  'Leverage AGIC Capital\'s backing to acquire specialized manufacturers (guidewires, active implantables) to close the scale gap instantly.',
+        rec:   'Target acquisitions that possess mature predictive modeling or machine vision assets, allowing AP Tech to inject ready-made digital maturity across its legacy facilities.',
+      },
+      {
+        letter: 'B', color: 'emerald', icon: Globe,
+        title: 'The "Vietnam-First" Pivot',
+        body:  'Prioritize immediate operational ramp-up of Bac Ninh as the primary tariff-exempt export hub for US OEMs seeking a "friendshoring" solution.',
+        rec:   'Deploy LLM-driven regulatory engines to automate QMS documentation and audit readiness. This algorithmic validation can accelerate ISO 13485 certification timelines by 30–40%.',
+      },
+      {
+        letter: 'C', color: 'purple', icon: Microscope,
+        title: 'Technical Specialization',
+        body:  'Focus Irvine R&D on "sub-micron" technologies (IVAS, neurovascular) to become an indispensable partner, commanding higher margins.',
+        rec:   'Embed Generative AI and physics-informed neural networks (PINNs) in Irvine to automate fluid dynamic simulations and generative die design.',
+      },
+    ],
+    recommendation: {
+      title:    'The Integrated Resilience Model',
+      subtitle: 'Recommended Path: Hybrid (Option B + Option A)',
+      body:     'The strongest 2026 trajectory aggressively operationalizes the Vietnam facility as a tariff-exempt bypass while executing targeted acquisitions to expand the product portfolio.',
+      points: [
+        { heading: 'Tariff Neutralization via Vietnam',  body: 'US OEMs face 20–40% duties on Chinese medical goods. AP Tech\'s Vietnam site provides an immediate competitive advantage that Western peers cannot match.' },
+        { heading: 'Strategic M&A (Buy-and-Build)',      body: 'Moving from a component supplier to a full-device assembler elevates margins and increases share of wallet.' },
+        { heading: 'Institutional Readiness',            body: 'Position AP Tech to Western OEMs as a "risk-mitigation partner" capable of sub-micron tolerances without tariff overhead.' },
+        { heading: 'The AI "Lock-In" Accelerator',       body: 'The 12-to-36-month validation cycle makes OEM relationships extremely sticky. Accelerating ISO 13485 via LLM validation guarantees seamless transfer from China to Vietnam.' },
+      ],
+    },
+  },
+
+  // ── Ecosystem mind-map ────────────────────────────────────────
+  // Icons are Lucide component references (imported at the top).
+  ecosystem: {
+    headline:    'Ecosystem Architecture',
+    description: 'Interactive structural mapping of AP Technologies. Click nodes to expand or collapse branches.',
+    data: {
+      id: 'root', label: 'AP Technologies Group Pte. Ltd.', icon: Activity,
+      children: [
+        { id: 'identity', label: 'Corporate Identity', icon: Building2, children: [
+            { label: 'Founded: 2013',              icon: Calendar   },
+            { label: 'HQ: Singapore',              icon: MapPin     },
+            { label: 'Type: MedTech CDMO',         icon: Factory    },
+            { label: 'Ownership: AGIC Capital',    icon: Briefcase  },
+        ]},
+        { id: 'manufacturing', label: 'Manufacturing Capabilities', icon: Factory, children: [
+            { label: 'Custom Polymer Extrusion',   icon: GitMerge   },
+            { label: 'PTFE Liner Processing',      icon: Layers     },
+            { label: 'Braid & Coil Reinforcement', icon: Settings   },
+            { label: 'Laser Marking & Ablation',   icon: Zap        },
+        ]},
+        { id: 'footprint', label: 'Global Footprint', icon: Globe, children: [
+            { label: 'Singapore — HQ & R&D',            icon: MapPin },
+            { label: 'Irvine, USA — Prototyping Lab',    icon: MapPin },
+            { label: 'Xiamen, China — High-Volume',      icon: MapPin },
+            { label: 'Bac Ninh, Vietnam — China+1',      icon: MapPin },
+        ]},
+        { id: 'markets', label: 'Strategic Markets', icon: Target, children: [
+            { label: 'Interventional Cardiology',   icon: HeartPulse },
+            { label: 'Neurology',                   icon: Brain      },
+            { label: 'Diagnostics',                 icon: Microscope },
+            { label: 'Diabetic Care',               icon: Activity   },
+        ]},
+        { id: 'strategy', label: 'AI Strategy Pillars', icon: Cpu, children: [
+            { label: 'Predictive Maintenance (PdM)', icon: Wrench     },
+            { label: 'Machine Vision QC',            icon: Eye        },
+            { label: 'NPI Acceleration',             icon: Rocket     },
+            { label: 'Supply Chain Intelligence',    icon: Globe      },
+        ]},
+      ],
+    },
+  },
+
+  // ── Footer ─────────────────────────────────────────────────────
+  footer: {
+    text: 'Strategic Blueprint Intelligence Portal • Based on Deep Dive & Market Analysis Reports 2026',
+  },
+};
+// ════════════════════════════════════════════════════════════════════
+//  END CONFIGURATION — Components start here
+// ════════════════════════════════════════════════════════════════════
+
+// Set page title from config
+document.title = PORTAL_CONFIG.brand.pageTitle;
+// Set preloader abbreviation
+const plAbbr = document.getElementById('pl-abbr');
+if (plAbbr) plAbbr.textContent = PORTAL_CONFIG.brand.abbreviation;
+
+// ── Shared helpers ──────────────────────────────────────────────────
+const SectionDivider = () => React.createElement('div', { className: 'relative my-32 flex items-center justify-center' },
+  React.createElement('div', { className: 'absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent' }),
+  React.createElement('div', { className: 'relative flex items-center gap-3 px-6 bg-slate-950' },
+    React.createElement('span', { className: 'block w-1.5 h-1.5 rounded-full bg-teal-400/60' }),
+    React.createElement('span', { className: 'block w-1 h-1 rounded-full bg-slate-700' }),
+    React.createElement('span', { className: 'block w-1 h-1 rounded-full bg-slate-700' })
+  )
+);
+
+// ── TreeNode (ecosystem mind-map) ───────────────────────────────────
+const TreeNode = ({ node, level = 0 }) => {
+  const [expanded, setExpanded] = useState(true);
+  const Icon = node.icon || null;
+  const hasChildren = node.children && node.children.length > 0;
+
+  const nodeClass = [
+    'flex items-center justify-between gap-3 cursor-pointer transition-all',
+    level === 0 && 'bg-slate-900 border-2 border-teal-500/50 text-white text-xl p-5 rounded-2xl shadow-[0_0_40px_rgba(20,184,166,0.15)] font-extrabold min-w-[340px] hover:border-teal-400',
+    level === 1 && 'bg-slate-900 border border-blue-500/40 text-blue-100 p-4 rounded-xl font-bold min-w-[280px] hover:border-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]',
+    level === 2 && 'bg-slate-900/90 border border-purple-500/40 text-purple-100 p-3 rounded-lg text-sm font-semibold min-w-[250px] hover:border-purple-500',
+    level === 3 && 'bg-slate-900/80 border border-emerald-500/30 text-emerald-100 p-2.5 px-4 rounded-md text-xs font-medium min-w-[230px] hover:border-emerald-500/60',
+  ].filter(Boolean).join(' ');
+
+  const iconColor = ['text-teal-400','text-blue-400','text-purple-400','text-emerald-400'][Math.min(level,3)];
+  const lineColor  = ['','bg-blue-500/40','bg-purple-500/40','bg-emerald-500/40'][Math.min(level,3)];
+  const dotColor   = ['','bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]','bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.8)]','bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]'][Math.min(level,3)];
+
+  return React.createElement('div', { className: 'flex items-center' },
+    React.createElement('div', { className: nodeClass, onClick: () => hasChildren && setExpanded(!expanded) },
+      React.createElement('div', { className: 'flex items-center gap-3' },
+        Icon && React.createElement(Icon, { className: `flex-shrink-0 ${level===0?'w-7 h-7':level===1?'w-5 h-5':'w-4 h-4'} ${iconColor}`, strokeWidth: level===0?2.5:2 }),
+        React.createElement('span', null, node.label)
+      ),
+      hasChildren && React.createElement('div', { className: 'ml-2 opacity-60 flex-shrink-0' },
+        expanded ? React.createElement(ChevronDown, { className: 'w-4 h-4' }) : React.createElement(ChevronRight, { className: 'w-4 h-4' })
+      )
+    ),
+    hasChildren && expanded && React.createElement('div', { className: 'flex items-stretch' },
+      React.createElement('div', { className: 'flex items-center' },
+        React.createElement('div', { className: `w-10 h-0.5 ${lineColor}` })
+      ),
+      React.createElement('div', { className: 'flex flex-col justify-center py-2' },
+        node.children.map((child, i) => {
+          const isFirst = i === 0, isLast = i === node.children.length - 1, isOnly = node.children.length === 1;
+          return React.createElement('div', { key: child.id || child.label, className: 'flex items-center relative my-2.5' },
+            !isOnly && React.createElement('div', { className: `absolute left-0 w-0.5 ${lineColor} ${isFirst?'top-1/2 bottom-0':isLast?'top-0 bottom-1/2':'top-0 bottom-0'}` }),
+            React.createElement('div', { className: 'flex items-center' },
+              React.createElement('div', { className: `w-10 h-0.5 ${lineColor}` }),
+              React.createElement('div', { className: `w-2.5 h-2.5 rounded-full ${dotColor} -ml-[5px] mr-3 z-10` })
+            ),
+            React.createElement(TreeNode, { node: child, level: level + 1 })
+          );
+        })
+      )
+    )
+  );
+};
+
+// ── usePortalAnimations — GSAP + Lenis setup ────────────────────────
+function usePortalAnimations(cfg) {
+  useEffect(() => {
+    const lenis = new Lenis({ lerp: 0.1, duration: 1.15, smoothWheel: true });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+
+    // Preloader
+    const pl = document.getElementById('preloader');
+    const plT = setTimeout(() => pl && pl.classList.add('done'), 1400);
+
+    // Scroll progress
+    const prog = document.getElementById('scrollProg');
+    const progST = ScrollTrigger.create({
+      start: 0, end: 'max',
+      onUpdate: self => { if (prog) prog.style.width = self.progress * 100 + '%'; },
+    });
+
+    // Section dot nav
+    const dotNav = document.getElementById('sectionDots');
+    const sections = Array.from(document.querySelectorAll('main section[id]'));
+    const dotMap = Object.create(null);
+    if (dotNav) {
+      dotNav.innerHTML = '';
+      sections.forEach(s => {
+        const a = document.createElement('a');
+        a.href = '#' + s.id;
+        a.setAttribute('data-label', s.id.replace(/-/g, ' '));
+        a.addEventListener('click', e => { e.preventDefault(); lenis.scrollTo('#' + s.id, { offset: -80 }); });
+        dotNav.appendChild(a);
+        dotMap[s.id] = a;
+      });
+    }
+
+    // Section dot active state
+    sections.forEach(sec => ScrollTrigger.create({
+      trigger: sec, start: 'top 55%', end: 'bottom 55%',
+      onToggle: self => {
+        const dot = dotMap[sec.id];
+        if (dot) dot.classList.toggle('is-active', self.isActive);
+      },
+    }));
+
+    // Reveal animations
+    document.querySelectorAll('[data-reveal]').forEach(el => {
+      gsap.fromTo(el, { opacity: 0, y: 40 }, {
+        opacity: 1, y: 0, duration: 1, ease: 'apEase',
+        scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' },
+      });
+    });
+    document.querySelectorAll('[data-reveal-stagger]').forEach(wrap => {
+      gsap.fromTo(wrap.children, { opacity: 0, y: 30 }, {
+        opacity: 1, y: 0, duration: 0.8, ease: 'apEase', stagger: 0.1,
+        scrollTrigger: { trigger: wrap, start: 'top 88%', toggleActions: 'play none none none' },
+      });
+    });
+
+    // H2 underline reveal
+    document.querySelectorAll('main section h2[data-h2-line]').forEach(h2 => {
+      ScrollTrigger.create({
+        trigger: h2, start: 'top 85%',
+        onEnter: () => h2.classList.add('is-in'),
+      });
+    });
+
+    // Animated metric counters
+    document.querySelectorAll('[data-counter]').forEach(el => {
+      const target   = parseFloat(el.dataset.target   || 0);
+      const decimals = parseInt(el.dataset.decimals   || 0, 10);
+      const prefix   = el.dataset.prefix   || '';
+      const suffix   = el.dataset.suffix   || '';
+      ScrollTrigger.create({
+        trigger: el, start: 'top 88%', once: true,
+        onEnter: () => {
+          gsap.fromTo({ val: 0 }, { val: target, duration: 2.2, ease: 'power2.out',
+            onUpdate: function() { el.textContent = prefix + this.targets()[0].val.toFixed(decimals) + suffix; }
+          });
+        },
+      });
+    });
+
+    return () => {
+      clearTimeout(plT);
+      progST.kill();
+      lenis.destroy();
+      ScrollTrigger.getAll().forEach(t => t.kill());
+      gsap.ticker.remove(t => lenis.raf(t * 1000));
+    };
+  }, []);
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SECTION COMPONENTS
+// ══════════════════════════════════════════════════════════════════
+
+// ── Overview (hero + metrics + media) ──────────────────────────────
+const OverviewSection = ({ cfg }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
+  const videoRef = useRef(null);
+
+  const toggleAudio = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); }
+    else { audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {}); }
+  };
+
+  const { hero, metrics, media } = cfg;
+  const BadgeIcon = hero.badgeIcon;
+
+  const chipColors = {
+    teal:   'border-teal-500/30 text-teal-300 bg-teal-500/8',
+    blue:   'border-blue-500/30  text-blue-300  bg-blue-500/8',
+    purple: 'border-purple-500/30 text-purple-300 bg-purple-500/8',
+  };
+
+  return React.createElement('section', { id: 'overview', className: 'min-h-[90vh] scroll-mt-24 flex flex-col justify-center space-y-16 md:space-y-24' },
+    // Hero
+    React.createElement('div', { className: 'flex flex-col items-start gap-8' },
+      // Badge
+      React.createElement('div', { className: 'ap-badge', 'data-reveal': '' },
+        React.createElement(BadgeIcon, { className: 'w-3 h-3' }),
+        hero.badge
+      ),
+      // Headline
+      React.createElement('div', { 'data-reveal': '', style: { transitionDelay: '.1s' } },
+        React.createElement('h1', { className: 'text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-none tracking-tight mb-4' },
+          hero.headline, React.createElement('br', null),
+          React.createElement('span', { className: 'text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500' }, hero.highlight)
+        ),
+        React.createElement('p', { className: 'text-slate-400 text-lg md:text-xl max-w-2xl leading-relaxed' }, hero.description)
+      ),
+      // Chips
+      React.createElement('div', { className: 'flex flex-wrap gap-3', 'data-reveal-stagger': '' },
+        hero.chips.map((chip, i) => {
+          const ChipIcon = chip.icon;
+          return React.createElement('div', {
+            key: i, 'data-anim': 'hero-chip',
+            className: `flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold ${chipColors[chip.color] || ''}`
+          },
+            React.createElement(ChipIcon, { className: 'w-4 h-4' }),
+            chip.label
+          );
+        })
+      )
+    ),
+    // Metrics grid
+    React.createElement('div', { className: 'grid grid-cols-2 lg:grid-cols-4 gap-4', 'data-reveal-stagger': '' },
+      metrics.map((m, i) => React.createElement('div', {
+        key: i,
+        className: 'metric-card bg-slate-900/80 border border-slate-800 rounded-2xl p-6 text-center backdrop-blur-sm'
+      },
+        React.createElement('div', {
+          className: 'text-3xl md:text-4xl font-black text-white mb-1 font-mono tracking-tight',
+          'data-counter': '', 'data-target': m.target, 'data-decimals': m.decimals,
+          'data-prefix': m.prefix, 'data-suffix': m.suffix
+        }, m.prefix + m.target.toFixed(m.decimals) + m.suffix),
+        React.createElement('div', { className: 'text-slate-400 text-xs uppercase tracking-widest font-bold mb-1' }, m.label),
+        React.createElement('div', { className: 'text-teal-500/70 text-xs font-mono' }, m.sub)
+      ))
+    ),
+    // Media
+    React.createElement('div', { className: 'space-y-6', 'data-reveal': '' },
+      React.createElement('h2', { className: 'text-2xl font-bold text-white', 'data-h2-line': '' }, media.sectionTitle),
+      React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-2 gap-6' },
+        // Video
+        React.createElement('div', { className: 'bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl ap-card-hover' },
+          React.createElement('div', { className: 'aspect-video bg-slate-950' },
+            React.createElement('video', { ref: videoRef, controls: true, className: 'w-full h-full object-cover', preload: 'metadata' },
+              React.createElement('source', { src: media.video.src, type: 'video/mp4' })
+            )
+          ),
+          React.createElement('div', { className: 'p-4' },
+            React.createElement('p', { className: 'text-sm font-semibold text-white' }, media.video.title)
+          )
+        ),
+        // Audio player
+        React.createElement('div', { className: 'bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between shadow-xl ap-card-hover' },
+          React.createElement('div', { className: 'ap-badge mb-4' }, media.audio.sectionLabel),
+          React.createElement('div', { className: 'mb-4' },
+            React.createElement('h3', { className: 'text-lg font-bold text-white mb-1' }, media.audio.title),
+            React.createElement('p', { className: 'text-slate-500 text-sm leading-relaxed' }, media.audio.description)
+          ),
+          // Wave bars
+          React.createElement('div', { className: 'flex items-end gap-1 h-12 mb-4', 'data-wave': '', 'data-playing': isPlaying ? '1' : '0' },
+            Array.from({ length: 28 }, (_, i) => React.createElement('div', {
+              key: i, className: 'wave-bar flex-1 rounded-sm',
+              style: { height: `${20 + Math.sin(i * 1.3) * 60}%`, background: isPlaying ? 'var(--teal)' : '#334155' }
+            }))
+          ),
+          React.createElement('div', { className: 'flex items-center gap-4' },
+            React.createElement('button', {
+              onClick: toggleAudio,
+              className: 'w-10 h-10 rounded-full bg-teal-500 flex items-center justify-center text-slate-900 hover:bg-teal-400 transition-colors shadow-lg'
+            }, isPlaying ? React.createElement(Pause, { className: 'w-4 h-4' }) : React.createElement(Play, { className: 'w-4 h-4 ml-0.5' })),
+            React.createElement('div', { className: 'font-mono text-xs text-slate-400' },
+              React.createElement('span', { className: 'text-white' }, media.audio.duration), ' / ', media.audio.total
+            )
+          ),
+          React.createElement('audio', { ref: audioRef, src: media.audio.src, onEnded: () => setIsPlaying(false) })
+        )
+      )
+    )
+  );
+};
+
+// ── Pitch Deck carousel ─────────────────────────────────────────────
+const PitchDeckSection = ({ cfg }) => {
+  const { pitchDeck } = cfg;
+  const [currentSlide, setCurrentSlide] = useState(1);
+  const total = pitchDeck.slideCount;
+  const prev = () => setCurrentSlide(s => Math.max(1, s - 1));
+  const next = () => setCurrentSlide(s => Math.min(total, s + 1));
+
+  useEffect(() => {
+    const onKey = e => {
+      if (e.key === 'ArrowRight') next();
+      if (e.key === 'ArrowLeft')  prev();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const takeaway = pitchDeck.takeaways[currentSlide] || '';
+
+  return React.createElement('section', { id: 'pitch-deck', className: 'space-y-6 scroll-mt-24' },
+    React.createElement('div', { 'data-reveal': '' },
+      React.createElement('h2', { className: 'text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-1', 'data-h2-line': '' }, pitchDeck.sectionTitle),
+      React.createElement('p', { className: 'text-slate-400 text-sm' }, pitchDeck.description)
+    ),
+    // Carousel frame
+    React.createElement('div', { className: 'bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col aspect-[16/10] w-full', 'data-reveal': '' },
+      // Slide image
+      React.createElement('div', { className: 'flex-1 overflow-hidden relative bg-slate-950' },
+        React.createElement('div', { key: currentSlide, className: 'slide-img-frame slide-fade-in' },
+          React.createElement('img', {
+            src: pitchDeck.slideDir + 'Slide' + currentSlide + '.JPG',
+            alt: 'Slide ' + currentSlide + ' of ' + total,
+            loading: 'eager'
+          })
+        )
+      ),
+      // Control bar
+      React.createElement('div', { className: 'bg-slate-950 px-5 py-3 border-t border-slate-800 flex items-center justify-between gap-4' },
+        // Takeaway text
+        React.createElement('p', { className: 'hidden md:block text-xs text-slate-500 flex-1 leading-relaxed' },
+          takeaway && React.createElement(React.Fragment, null,
+            React.createElement('strong', { className: 'text-slate-300 mr-1.5' }, 'Takeaway:'),
+            takeaway
+          )
+        ),
+        // Navigation
+        React.createElement('div', { className: 'flex items-center gap-3 flex-shrink-0 mx-auto md:mx-0' },
+          React.createElement('button', {
+            onClick: prev, disabled: currentSlide === 1, 'data-slide-prev': true,
+            className: 'p-2.5 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed border border-slate-700/50'
+          }, React.createElement(ChevronLeft, { className: 'w-4 h-4' })),
+          // Dot indicators
+          React.createElement('div', { className: 'flex gap-1 overflow-x-auto max-w-[140px] py-0.5' },
+            Array.from({ length: total }, (_, i) => React.createElement('div', {
+              key: i,
+              className: `h-2 rounded-full flex-shrink-0 transition-all duration-300 ${currentSlide === i+1 ? 'bg-teal-500 w-5' : 'bg-slate-700 w-2'}`
+            }))
+          ),
+          React.createElement('button', {
+            onClick: next, disabled: currentSlide === total, 'data-slide-next': true,
+            className: 'p-2.5 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed border border-slate-700/50'
+          }, React.createElement(ChevronRight, { className: 'w-4 h-4' }))
+        )
+      )
+    )
+  );
+};
+
+// ── Capabilities ────────────────────────────────────────────────────
+const CapabilitiesSection = ({ cfg }) => {
+  const { capabilities } = cfg;
+  return React.createElement('section', { id: 'capabilities', className: 'space-y-12 scroll-mt-24' },
+    React.createElement('div', { className: 'text-center max-w-3xl mx-auto', 'data-reveal': '' },
+      React.createElement('div', { className: 'ap-badge mb-4' }, capabilities.badge),
+      React.createElement('h2', { className: 'text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-3', 'data-h2-line': '' }, 'Engineering Capabilities'),
+      React.createElement('p', { className: 'text-slate-400 leading-relaxed' }, capabilities.description)
+    ),
+    React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-8', 'data-reveal-stagger': '' },
+      capabilities.cards.map((card, i) => {
+        const Icon = card.icon;
+        return React.createElement('div', {
+          key: i,
+          className: `bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-8 relative overflow-hidden group ap-card-hover ${card.hoverBorder} transition-all duration-500`
+        },
+          React.createElement('div', { className: 'absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity' },
+            React.createElement(Icon, { className: 'w-24 h-24 text-slate-400' })
+          ),
+          React.createElement('div', { className: 'relative z-10' },
+            React.createElement('div', { className: 'w-12 h-12 bg-slate-800 rounded-xl flex items-center justify-center mb-6' },
+              React.createElement(Icon, { className: `w-6 h-6 ${card.iconColor}` })
+            ),
+            React.createElement('h3', { className: 'text-xl font-bold text-white mb-3' }, card.title),
+            React.createElement('p', { className: 'text-slate-400 text-sm mb-6 leading-relaxed' }, card.description),
+            React.createElement('ul', { className: 'space-y-2 text-sm text-slate-300' },
+              card.bullets.map((b, j) => React.createElement('li', { key: j, className: 'flex items-center' },
+                React.createElement(ChevronRight, { className: `w-4 h-4 text-${card.bulletColor} mr-2 flex-shrink-0` }),
+                b
+              ))
+            )
+          )
+        );
+      })
+    )
+  );
+};
+
+// ── Footprint ───────────────────────────────────────────────────────
+const FootprintSection = ({ cfg }) => {
+  const { footprint } = cfg;
+  const tagColors = {
+    teal:    'text-teal-400 bg-teal-500/10',
+    blue:    'text-blue-400 bg-blue-500/10',
+    purple:  'text-purple-400 bg-purple-500/10',
+    emerald: 'text-emerald-400 bg-emerald-500/10',
+  };
+  return React.createElement('section', { id: 'footprint', className: 'space-y-12 scroll-mt-24' },
+    React.createElement('div', { className: 'flex flex-col md:flex-row gap-12 items-center' },
+      React.createElement('div', { className: 'md:w-1/2 space-y-6', 'data-reveal': '' },
+        React.createElement('h2', { className: 'text-3xl font-bold text-white', 'data-h2-line': '' }, footprint.headline),
+        React.createElement('div', { className: 'ap-badge' }, footprint.badge),
+        React.createElement('p', { className: 'text-slate-400 text-lg leading-relaxed' }, footprint.description),
+        React.createElement('p', { className: 'text-slate-400 leading-relaxed' }, footprint.sub)
+      ),
+      React.createElement('div', { className: 'md:w-1/2 w-full', 'data-reveal': '' },
+        React.createElement('div', { className: 'bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6 relative' },
+          React.createElement(Map, { className: 'absolute right-8 top-8 w-28 h-28 text-slate-800/50' }),
+          footprint.locations.map((loc, i) => React.createElement('div', {
+            key: i,
+            className: `relative z-10 ${i > 0 ? 'border-t border-slate-800 pt-6' : ''}`
+          },
+            React.createElement('div', { className: 'flex items-center justify-between mb-1' },
+              React.createElement('span', { className: `font-bold text-white text-lg flex items-center` },
+                React.createElement('div', { className: `w-2 h-2 rounded-full ${loc.dot} mr-3` }),
+                loc.name
+              ),
+              loc.tag && React.createElement('span', { className: `text-xs font-mono px-2 py-1 rounded ${tagColors[loc.tagColor] || ''}` }, loc.tag)
+            ),
+            React.createElement('p', { className: 'text-sm text-slate-500 pl-5' }, loc.desc)
+          ))
+        )
+      )
+    )
+  );
+};
+
+// ── Strategy ────────────────────────────────────────────────────────
+const StrategySection = ({ cfg }) => {
+  const { strategy } = cfg;
+  return React.createElement('section', { id: 'strategy', className: 'space-y-8 scroll-mt-24' },
+    React.createElement('div', { className: 'text-center max-w-4xl mx-auto mb-10', 'data-reveal': '' },
+      React.createElement('h2', { className: 'text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4', 'data-h2-line': '' }, strategy.headline),
+      React.createElement('p', { className: 'text-teal-400 text-lg font-medium mb-3' }, strategy.subheadline),
+      React.createElement('p', { className: 'text-slate-400 text-sm leading-relaxed' }, strategy.description)
+    ),
+    // Pillar I (full width with table + savings)
+    strategy.pillars[0] && React.createElement('div', { className: 'bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-8 md:p-10', 'data-reveal': '' },
+      (() => {
+        const p = strategy.pillars[0];
+        const PIcon = p.icon;
+        return React.createElement('div', { className: 'flex flex-col lg:flex-row gap-10 items-center' },
+          React.createElement('div', { className: 'w-full lg:w-1/2' },
+            React.createElement('div', { className: 'flex items-center gap-3 mb-4' },
+              React.createElement('div', { className: `p-3 ${p.iconBg} rounded-xl` }, React.createElement(PIcon, { className: `w-6 h-6 ${p.iconColor}` })),
+              React.createElement('h3', { className: 'text-2xl font-bold text-white uppercase tracking-wider' }, 'Pillar ' + p.numeral + ': ' + p.title)
+            ),
+            React.createElement('p', { className: 'text-slate-400 text-sm mb-6 leading-relaxed' }, p.body),
+            p.tableHeaders && React.createElement('div', { className: 'bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden' },
+              React.createElement('div', { className: 'grid grid-cols-2 text-xs uppercase tracking-wider font-bold bg-slate-900 border-b border-slate-800' },
+                React.createElement('div', { className: 'p-4 text-slate-500' }, p.tableHeaders[0]),
+                React.createElement('div', { className: 'p-4 text-teal-400 bg-teal-900/10 border-l border-slate-800' }, p.tableHeaders[1])
+              ),
+              p.tableRows.map((row, ri) => React.createElement('div', {
+                key: ri,
+                className: `grid grid-cols-2 text-sm ${ri < p.tableRows.length-1 ? 'border-b border-slate-800' : ''}`
+              },
+                React.createElement('div', { className: 'p-4 text-slate-400' }, row[0]),
+                React.createElement('div', { className: 'p-4 text-white bg-teal-900/10 border-l border-slate-800 flex items-center gap-2' },
+                  React.createElement(CheckCircle2, { className: 'w-4 h-4 text-teal-500 flex-shrink-0' }), row[1]
+                )
+              ))
+            )
+          ),
+          p.savings && React.createElement('div', { className: 'w-full lg:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-4' },
+            React.createElement('div', { className: 'col-span-full mb-2' },
+              React.createElement('h4', { className: 'text-white font-bold text-lg mb-1 flex items-center gap-2' },
+                React.createElement(TrendingDown, { className: 'w-5 h-5 text-emerald-400' }), 'Financial Quantification'
+              ),
+              React.createElement('p', { className: 'text-slate-500 text-xs uppercase tracking-wider' }, 'Projected $500K+ Annual Savings')
+            ),
+            p.savings.map((s, si) => React.createElement('div', { key: si, className: 'bg-slate-800/50 border border-slate-700 rounded-xl p-5' },
+              React.createElement('div', { className: 'text-emerald-400 font-bold text-xl mb-1' }, s.value),
+              React.createElement('div', { className: 'text-slate-300 text-sm font-semibold mb-1' }, s.label),
+              React.createElement('div', { className: 'text-slate-500 text-xs' }, s.sub)
+            ))
+          )
+        );
+      })()
+    ),
+    // Pillars II & III (side by side)
+    React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-2 gap-8', 'data-reveal-stagger': '' },
+      strategy.pillars.slice(1).map((p, i) => {
+        const PIcon = p.icon;
+        return React.createElement('div', { key: i, className: 'bg-slate-900 border border-slate-800 rounded-3xl p-8' },
+          React.createElement('div', { className: 'flex items-center gap-3 mb-4' },
+            React.createElement('div', { className: `p-3 ${p.iconBg} rounded-xl` }, React.createElement(PIcon, { className: `w-6 h-6 ${p.iconColor}` })),
+            React.createElement('h3', { className: 'text-xl font-bold text-white uppercase tracking-wider' }, 'Pillar ' + p.numeral + ': ' + p.title)
+          ),
+          React.createElement('p', { className: 'text-slate-400 text-sm leading-relaxed' }, p.body)
+        );
+      })
+    ),
+    // Yield stats + lock-in
+    React.createElement('div', { className: 'bg-gradient-to-r from-teal-900/40 via-slate-900 to-blue-900/40 border border-teal-500/30 rounded-3xl p-8 md:p-12', 'data-reveal': '' },
+      React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-3 gap-6 mb-10' },
+        strategy.yields.map((y, i) => React.createElement('div', { key: i, className: 'bg-slate-950/50 border border-slate-800 rounded-2xl p-6 text-center' },
+          React.createElement('div', { className: 'text-4xl font-extrabold text-white mb-1 tracking-tighter' }, y.value, React.createElement('span', { className: 'text-teal-500 text-2xl' }, y.suffix)),
+          React.createElement('div', { className: 'text-sm font-bold text-slate-300 uppercase tracking-widest mb-1' }, y.label),
+          React.createElement('p', { className: 'text-slate-500 text-xs' }, y.sub)
+        ))
+      ),
+      React.createElement('div', { className: 'bg-slate-900 border-l-4 border-teal-500 rounded-r-2xl p-6' },
+        React.createElement('div', { className: 'flex items-start gap-4' },
+          React.createElement(Lock, { className: 'w-8 h-8 text-teal-400 flex-shrink-0 mt-1' }),
+          React.createElement('div', null,
+            React.createElement('h4', { className: 'text-lg font-bold text-white uppercase tracking-wider mb-2' }, strategy.lockIn.title),
+            React.createElement('p', { className: 'text-slate-400 leading-relaxed text-sm' }, strategy.lockIn.body)
+          )
+        )
+      )
+    )
+  );
+};
+
+// ── Board Briefing ──────────────────────────────────────────────────
+const BriefingSection = ({ cfg }) => {
+  const { briefing } = cfg;
+  const BadgeIcon = briefing.badgeIcon;
+  const optionColors = {
+    blue:    { border: 'border-blue-500/30', bg: 'bg-blue-900/20', text: 'text-blue-400', rec: 'text-blue-200/70' },
+    emerald: { border: 'border-emerald-500/30', bg: 'bg-emerald-900/20', text: 'text-emerald-400', rec: 'text-emerald-200/70' },
+    purple:  { border: 'border-purple-500/30', bg: 'bg-purple-900/20', text: 'text-purple-400', rec: 'text-purple-200/70' },
+  };
+  return React.createElement('section', { id: 'briefing', className: 'space-y-10 scroll-mt-24' },
+    React.createElement('div', { className: 'text-center max-w-4xl mx-auto mb-8', 'data-reveal': '' },
+      React.createElement('div', { className: 'ap-badge mb-6' }, React.createElement(BadgeIcon, { className: 'w-3.5 h-3.5' }), briefing.badge),
+      React.createElement('h2', { className: 'text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-4', 'data-h2-line': '' }, briefing.headline),
+      React.createElement('p', { className: 'text-slate-400 text-lg leading-relaxed' }, briefing.description)
+    ),
+    // Evidence + Risks
+    React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-8', 'data-reveal-stagger': '' },
+      React.createElement('div', { className: 'bg-slate-900 border border-slate-800 rounded-3xl p-8' },
+        React.createElement('div', { className: 'flex items-center gap-3 mb-6 border-b border-slate-800 pb-4' },
+          React.createElement(ShieldCheck, { className: 'w-6 h-6 text-emerald-400' }),
+          React.createElement('h3', { className: 'text-xl font-bold text-white uppercase tracking-wider' }, 'Strategic Evidence')
+        ),
+        React.createElement('ul', { className: 'space-y-4' },
+          briefing.strengths.map((s, i) => React.createElement('li', { key: i, className: 'flex items-start' },
+            React.createElement(CheckCircle2, { className: 'w-5 h-5 text-emerald-500 mr-3 flex-shrink-0 mt-0.5' }),
+            React.createElement('div', null, React.createElement('strong', { className: 'text-white' }, s.title + ': '), React.createElement('span', { className: 'text-slate-400 text-sm' }, s.body))
+          ))
+        )
+      ),
+      React.createElement('div', { className: 'bg-slate-900 border border-slate-800 rounded-3xl p-8' },
+        React.createElement('div', { className: 'flex items-center gap-3 mb-6 border-b border-slate-800 pb-4' },
+          React.createElement(AlertCircle, { className: 'w-6 h-6 text-red-400' }),
+          React.createElement('h3', { className: 'text-xl font-bold text-white uppercase tracking-wider' }, 'Risks & Constraints')
+        ),
+        React.createElement('ul', { className: 'space-y-4' },
+          briefing.risks.map((r, i) => React.createElement('li', { key: i, className: 'flex items-start' },
+            React.createElement(AlertTriangle, { className: 'w-5 h-5 text-red-500 mr-3 flex-shrink-0 mt-0.5' }),
+            React.createElement('div', null, React.createElement('strong', { className: 'text-white' }, r.title + ': '), React.createElement('span', { className: 'text-slate-400 text-sm' }, r.body))
+          ))
+        )
+      )
+    ),
+    // Strategic Options
+    React.createElement('h3', { className: 'text-2xl font-bold text-white mt-12 mb-6 uppercase tracking-widest text-center' }, '2026 Strategic Options'),
+    React.createElement('div', { className: 'grid grid-cols-1 lg:grid-cols-3 gap-6', 'data-reveal-stagger': '' },
+      briefing.options.map(opt => {
+        const c = optionColors[opt.color] || optionColors.blue;
+        const OptIcon = opt.icon;
+        return React.createElement('div', { key: opt.letter, className: 'bg-slate-900/80 border border-slate-700 rounded-2xl p-6 flex flex-col' },
+          React.createElement('div', { className: 'flex items-center justify-between mb-4' },
+            React.createElement('span', { className: `${c.text} font-bold tracking-widest uppercase text-sm` }, 'Option ' + opt.letter),
+            React.createElement(OptIcon, { className: `w-5 h-5 ${c.text} opacity-70` })
+          ),
+          React.createElement('h4', { className: 'text-white font-bold text-lg mb-2' }, opt.title),
+          React.createElement('p', { className: 'text-slate-400 text-sm mb-4 flex-1' }, opt.body),
+          React.createElement('div', { className: `${c.bg} border ${c.border} rounded-lg p-4 mt-auto` },
+            React.createElement('p', { className: `${c.rec} text-xs leading-relaxed` }, opt.rec)
+          )
+        );
+      })
+    ),
+    // Recommendation
+    React.createElement('div', { className: 'bg-gradient-to-r from-slate-900 via-slate-900 to-teal-900/20 border border-teal-500/30 rounded-3xl p-8 md:p-12 shadow-2xl', 'data-reveal': '' },
+      React.createElement('div', { className: 'mb-6' },
+        React.createElement('h3', { className: 'text-2xl md:text-3xl font-extrabold text-white mb-1' }, briefing.recommendation.title),
+        React.createElement('p', { className: 'text-teal-400 font-bold uppercase tracking-widest text-sm' }, briefing.recommendation.subtitle)
+      ),
+      React.createElement('p', { className: 'text-slate-300 text-lg leading-relaxed mb-8 max-w-4xl' }, briefing.recommendation.body),
+      React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-6' },
+        briefing.recommendation.points.map((pt, i) => React.createElement('div', {
+          key: i,
+          className: `bg-slate-950/50 rounded-2xl p-6 border ${i === 3 ? 'border-l-2 border-teal-500 border-t-slate-800 border-r-slate-800 border-b-slate-800' : 'border-slate-800'}`
+        },
+          React.createElement('h4', { className: `font-bold mb-2 ${i === 3 ? 'text-teal-400' : 'text-white'}` }, pt.heading),
+          React.createElement('p', { className: 'text-slate-400 text-sm leading-relaxed' }, pt.body)
+        ))
+      )
+    )
+  );
+};
+
+// ── Ecosystem ───────────────────────────────────────────────────────
+const EcosystemSection = ({ cfg }) => {
+  const { ecosystem } = cfg;
+  return React.createElement('section', { id: 'ecosystem', className: 'scroll-mt-24' },
+    React.createElement('div', { className: 'h-[70vh] min-h-[600px] w-full rounded-3xl border border-slate-800 bg-slate-950 overflow-hidden relative shadow-2xl' },
+      React.createElement('div', { className: 'absolute inset-0 bg-grid-pattern pointer-events-none opacity-50' }),
+      React.createElement('div', { className: 'w-full h-full overflow-auto custom-scrollbar relative z-10 p-12' },
+        React.createElement('div', { className: 'min-w-max pb-32 pr-32' },
+          React.createElement('div', { className: 'mb-8 max-w-lg' },
+            React.createElement('h2', { className: 'text-3xl font-bold text-white mb-2', 'data-h2-line': '' }, ecosystem.headline),
+            React.createElement('p', { className: 'text-slate-400 text-sm' }, ecosystem.description)
+          ),
+          React.createElement(TreeNode, { node: ecosystem.data, level: 0 })
+        )
+      )
+    )
+  );
+};
+
+// ── App (nav + all sections) ────────────────────────────────────────
+const App = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+  usePortalAnimations(PORTAL_CONFIG);
+
+  const navLinks = PORTAL_CONFIG.nav;
+  const { brand, footer } = PORTAL_CONFIG;
+
+  const scrollTo = (id) => {
+    setMenuOpen(false);
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  return React.createElement(React.Fragment, null,
+    // ── Navigation ────────────────────────────────────────────────
+    React.createElement('nav', {
+      className: 'sticky top-0 z-50 bg-slate-950/88 backdrop-blur-xl border-b border-slate-800/60'
+    },
+      React.createElement('div', { className: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8' },
+        React.createElement('div', { className: 'flex items-center justify-between h-16' },
+          // Logo
+          React.createElement('div', { className: 'flex items-center space-x-2' },
+            React.createElement('img', {
+              src: 'assets/logo.png', alt: brand.name + ' logo',
+              className: 'nav-logo-img',
+              onError: function(e) {
+                e.target.style.display = 'none';
+                const fb = e.target.nextSibling;
+                if (fb) fb.style.display = 'inline-flex';
+              }
+            }),
+            React.createElement(Activity, { className: 'h-6 w-6 text-teal-400', style: { display: 'none' } }),
+            React.createElement('span', { className: 'logo-text text-xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500 tracking-wider' }, brand.name),
+            React.createElement('span', { className: 'text-xs font-semibold text-slate-500 uppercase tracking-widest border-l border-slate-700 pl-2 ml-1' }, brand.tagline)
+          ),
+          // Desktop nav links
+          React.createElement('div', { className: 'hidden md:flex items-center space-x-1' },
+            navLinks.map(link => React.createElement('button', {
+              key: link.id, onClick: () => scrollTo(link.id),
+              className: 'px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors uppercase tracking-wider'
+            }, link.label))
+          ),
+          // Mobile hamburger
+          React.createElement('button', {
+            onClick: () => setMenuOpen(!menuOpen),
+            className: 'md:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors'
+          }, menuOpen ? React.createElement(X, { className: 'w-5 h-5' }) : React.createElement(Menu, { className: 'w-5 h-5' }))
+        ),
+        // Mobile menu
+        menuOpen && React.createElement('div', { className: 'md:hidden border-t border-slate-800/60 py-3 space-y-1' },
+          navLinks.map(link => React.createElement('button', {
+            key: link.id, onClick: () => scrollTo(link.id),
+            className: 'w-full text-left px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white hover:bg-slate-800/60 rounded-lg transition-colors uppercase tracking-wider'
+          }, link.label))
+        )
+      )
+    ),
+
+    // ── Main content ───────────────────────────────────────────────
+    React.createElement('main', { className: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-0' },
+      React.createElement(OverviewSection,    { cfg: PORTAL_CONFIG }),
+      React.createElement(SectionDivider),
+      React.createElement(PitchDeckSection,   { cfg: PORTAL_CONFIG }),
+      React.createElement(SectionDivider),
+      React.createElement(CapabilitiesSection,{ cfg: PORTAL_CONFIG }),
+      React.createElement(SectionDivider),
+      React.createElement(FootprintSection,   { cfg: PORTAL_CONFIG }),
+      React.createElement(SectionDivider),
+      React.createElement(StrategySection,    { cfg: PORTAL_CONFIG }),
+      React.createElement(SectionDivider),
+      React.createElement(BriefingSection,    { cfg: PORTAL_CONFIG }),
+      React.createElement(SectionDivider),
+      React.createElement(EcosystemSection,   { cfg: PORTAL_CONFIG })
+    ),
+
+    // ── Footer ─────────────────────────────────────────────────────
+    React.createElement('footer', { className: 'border-t border-slate-800 mt-20 py-10 text-center text-slate-500 text-sm' },
+      React.createElement('div', { className: 'max-w-7xl mx-auto px-4' },
+        React.createElement('p', null, footer.text)
+      )
+    )
+  );
+};
+
+createRoot(document.getElementById('root')).render(React.createElement(App));
+  </script>
+</body>
+</html>
