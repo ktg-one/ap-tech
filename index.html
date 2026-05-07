@@ -25,6 +25,10 @@
         "lucide-react": "https://esm.sh/lucide-react@0.292.0",
         "gsap": "https://esm.sh/gsap@3.13.0",
         "gsap/ScrollTrigger": "https://esm.sh/gsap@3.13.0/ScrollTrigger",
+        "gsap/SplitText": "https://esm.sh/gsap@3.13.0/SplitText",
+        "gsap/ScrambleTextPlugin": "https://esm.sh/gsap@3.13.0/ScrambleTextPlugin",
+        "gsap/Observer": "https://esm.sh/gsap@3.13.0/Observer",
+        "gsap/CustomEase": "https://esm.sh/gsap@3.13.0/CustomEase",
         "lenis": "https://esm.sh/lenis@1.1.20"
       }
     }
@@ -173,8 +177,8 @@
     /* ─── REVEAL ANIMATIONS ─────────────────── */
     [data-reveal] { opacity: 0; transform: translateY(40px); will-change: opacity, transform; }
     [data-reveal-stagger] > * { opacity: 0; transform: translateY(30px); will-change: opacity, transform; }
-    .hero-line { display: block; overflow: hidden; }
-    .hero-line > span { display: inline-block; transform: translateY(110%); will-change: transform; }
+    /* SplitText line wrapper — opt-in masking handled by `mask: 'lines'` */
+    .hero-split-line { will-change: transform; }
 
     /* ─── REFINED HOVERS / FOCUS ─────────────── */
     a, button { transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -240,7 +244,7 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
       .aurora::before, .aurora::after { animation: none !important; }
-      [data-reveal], [data-reveal-stagger] > *, .hero-line > span { opacity: 1 !important; transform: none !important; }
+      [data-reveal], [data-reveal-stagger] > *, .hero-split-line { opacity: 1 !important; transform: none !important; }
     }
   </style>
 </head>
@@ -284,9 +288,15 @@
     import { createRoot } from 'react-dom/client';
     import gsap from 'gsap';
     import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    import { SplitText } from 'gsap/SplitText';
+    import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
+    import { Observer } from 'gsap/Observer';
+    import { CustomEase } from 'gsap/CustomEase';
     import Lenis from 'lenis';
 
-    gsap.registerPlugin(ScrollTrigger);
+    gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin, Observer, CustomEase);
+    // Brand signature ease — used across the site for consistency
+    CustomEase.create('apEase', '0.16, 1, 0.3, 1');
     import { 
       Globe, Shield, Cpu, Activity, Zap, Factory, Crosshair, Layers, 
       ChevronRight, ChevronDown, BarChart3, Microscope, ShieldCheck, Map,
@@ -605,15 +615,29 @@
           },
         }));
 
-        // 6) Hero entrance choreography
+        // 6) Hero entrance choreography (SplitText per-line mask reveal)
+        let heroSplit = null;
         if (!reduced) {
           const heroTitle = document.querySelector('[data-anim="hero-title"]');
           if (heroTitle) {
-            const tl = gsap.timeline({ delay: 0.6, defaults: { ease: 'expo.out' } });
-            tl.from('[data-anim="hero-badge"]', { y: 20, opacity: 0, duration: 0.8 })
-              .from(heroTitle.querySelectorAll('.hero-line > span'), { yPercent: 110, duration: 1.2, stagger: 0.08 }, '-=0.5')
-              .from('[data-anim="hero-sub"]', { y: 20, opacity: 0, duration: 0.9 }, '-=0.7')
-              .from('[data-anim="hero-chip"]', { y: 16, opacity: 0, duration: 0.6, stagger: 0.08 }, '-=0.6');
+            // Wait for fonts before splitting to avoid line-break shifts
+            const splitNow = () => {
+              heroSplit = SplitText.create(heroTitle, {
+                type: 'lines, words',
+                mask: 'lines',
+                linesClass: 'hero-split-line',
+              });
+              const tl = gsap.timeline({ defaults: { ease: 'apEase' } });
+              tl.from('[data-anim="hero-badge"]', { y: 20, opacity: 0, duration: 0.8 })
+                .from(heroSplit.lines, { yPercent: 110, duration: 1.1, stagger: 0.09 }, '-=0.4')
+                .from('[data-anim="hero-sub"]', { y: 20, opacity: 0, duration: 0.9 }, '-=0.6')
+                .from('[data-anim="hero-chip"]', { y: 16, opacity: 0, duration: 0.6, stagger: 0.08 }, '-=0.5');
+            };
+            if (document.fonts && document.fonts.ready) {
+              document.fonts.ready.then(splitNow);
+            } else {
+              splitNow();
+            }
           }
           // Hero blob parallax
           const heroBlob = document.querySelector('[data-anim="hero-blob"]');
@@ -674,7 +698,7 @@
           });
         }
 
-        // 9a) Number counter-up on metric cards
+        // 9a) Metric numbers — scramble through digits and land on the value
         const counters = document.querySelectorAll('[data-counter]');
         const counterTriggers = [];
         counters.forEach(el => {
@@ -682,10 +706,10 @@
           const decimals = parseInt(el.dataset.decimals || '0', 10);
           const prefix = el.dataset.prefix || '';
           const suffix = el.dataset.suffix || '';
-          const obj = { v: 0 };
-          const tw = gsap.to(obj, {
-            v: target, duration: 2, ease: 'power3.out', paused: true,
-            onUpdate: () => { el.textContent = prefix + obj.v.toFixed(decimals) + suffix; }
+          const finalText = prefix + target.toFixed(decimals) + suffix;
+          const tw = gsap.to(el, {
+            duration: 1.6, ease: 'apEase', paused: true,
+            scrambleText: { text: finalText, chars: '0123456789', revealDelay: 0.2, speed: 0.7, tweenLength: false },
           });
           counterTriggers.push(ScrollTrigger.create({
             trigger: el, start: 'top 90%', once: true, onEnter: () => tw.play(),
@@ -702,6 +726,32 @@
             onEnter: () => h.classList.add('is-in'),
           }));
         });
+
+        // 9c) Carousel: swipe (touch) + keyboard arrow navigation
+        const deck = document.getElementById('pitch-deck');
+        const prevBtn = () => document.querySelector('[data-slide-prev]');
+        const nextBtn = () => document.querySelector('[data-slide-next]');
+        const clickPrev = () => { const b = prevBtn(); if (b && !b.disabled) b.click(); };
+        const clickNext = () => { const b = nextBtn(); if (b && !b.disabled) b.click(); };
+        let deckObs = null;
+        if (deck) {
+          deckObs = Observer.create({
+            target: deck,
+            type: 'touch', // wheel is owned by Lenis; keep touch only to avoid scroll conflicts
+            tolerance: 60,
+            onLeft:  clickNext,
+            onRight: clickPrev,
+          });
+        }
+        const onKey = (e) => {
+          if (!deck) return;
+          const r = deck.getBoundingClientRect();
+          const inView = r.top < window.innerHeight * 0.9 && r.bottom > 0;
+          if (!inView) return;
+          if (e.key === 'ArrowRight') { e.preventDefault(); clickNext(); }
+          if (e.key === 'ArrowLeft')  { e.preventDefault(); clickPrev(); }
+        };
+        window.addEventListener('keydown', onKey);
 
         // 10) Hijack in-page anchor clicks → Lenis (so dropdown nav animates smoothly too)
         const anchorHandler = (e) => {
@@ -729,6 +779,9 @@
           revealTriggers.forEach(t => t.kill());
           counterTriggers.forEach(t => t.kill());
           h2Triggers.forEach(t => t.kill());
+          deckObs && deckObs.kill();
+          heroSplit && heroSplit.revert();
+          window.removeEventListener('keydown', onKey);
           magnetCleanups.forEach(fn => fn());
           if (cursorMove) window.removeEventListener('mousemove', cursorMove);
           if (cursorEnter) hoverEls.forEach(el => {
@@ -830,10 +883,8 @@
                     <ShieldCheck className="w-4 h-4" />
                     <span>Tier-1 MedTech CDMO</span>
                   </div>
-                  <h1 data-anim="hero-title" className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.05]">
-                    <span className="hero-line"><span>Precision Medical</span></span>
-                    <span className="hero-line"><span>Manufacturing at</span></span>
-                    <span className="hero-line"><span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">Global Scale.</span></span>
+                  <h1 data-anim="hero-title" className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.05]" style={{ fontKerning: 'none', textRendering: 'optimizeSpeed' }}>
+                    Precision Medical Manufacturing at <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">Global Scale.</span>
                   </h1>
                   <p data-anim="hero-sub" className="text-xl text-slate-400 mb-8 leading-relaxed max-w-2xl">
                     Transitioning from a boutique extruder to a vertically integrated, multi-continent platform. Derisking the global supply chain for Class II & III medical devices.
@@ -1513,10 +1564,11 @@
 
                   {/* Slider Controls */}
                   <div className="flex items-center space-x-4 flex-shrink-0 mx-auto md:mx-0">
-                    <button 
-                      onClick={prevSlide} 
+                    <button
+                      onClick={prevSlide}
                       disabled={currentSlide === 1}
                       data-magnetic
+                      data-slide-prev
                       className="p-3 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-slate-700/50"
                     >
                       <ChevronLeft className="w-5 h-5" />
@@ -1529,10 +1581,11 @@
                         ></div>
                       ))}
                     </div>
-                    <button 
+                    <button
                       onClick={nextSlide}
                       disabled={currentSlide === totalSlides}
                       data-magnetic
+                      data-slide-next
                       className="p-3 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-slate-700/50"
                     >
                       <ChevronRight className="w-5 h-5" />
