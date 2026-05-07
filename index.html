@@ -201,6 +201,15 @@
     <div class="pl-mark">AP<span class="pl-dot"></span></div>
     <div class="pl-bar"></div>
   </div>
+  <script>
+    // Defensive failsafe: hide preloader after 3s no matter what (in case React fails to mount).
+    setTimeout(function () {
+      var pl = document.getElementById('preloader');
+      if (pl && !pl.classList.contains('done')) pl.classList.add('done');
+    }, 3000);
+    // Also catch unhandled errors and surface them instead of silently blanking.
+    window.addEventListener('error', function (e) { console.error('[ap-tech] runtime error:', e.error || e.message); });
+  </script>
 
   <!-- Ambient layers -->
   <div class="aurora" aria-hidden="true"></div>
@@ -523,9 +532,10 @@
         });
 
         // 5) Section dot nav
+        // NOTE: `Map` is shadowed by lucide-react's Map icon import — use plain object.
         const dotNav = document.getElementById('sectionDots');
         const sections = Array.from(document.querySelectorAll('main section[id]'));
-        const dotMap = new Map();
+        const dotMap = Object.create(null);
         if (dotNav) {
           dotNav.innerHTML = '';
           sections.forEach((s) => {
@@ -534,13 +544,13 @@
             a.setAttribute('data-label', s.id.replace('-', ' '));
             a.addEventListener('click', (e) => { e.preventDefault(); lenis.scrollTo('#' + s.id, { offset: -80 }); });
             dotNav.appendChild(a);
-            dotMap.set(s.id, a);
+            dotMap[s.id] = a;
           });
         }
         const dotTriggers = sections.map(s => ScrollTrigger.create({
           trigger: s, start: 'top 40%', end: 'bottom 40%',
           onToggle: (self) => {
-            const a = dotMap.get(s.id);
+            const a = dotMap[s.id];
             if (a) a.classList.toggle('is-active', self.isActive);
           },
         }));
