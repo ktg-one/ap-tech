@@ -1,0 +1,3 @@
+.build/node_modules/
+.build/extracted.mjs
+.build/index.html.pre-compile.bak
