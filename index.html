@@ -11,26 +11,44 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
   <!-- Babel for in-browser JSX compilation -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <!-- ESM Import Map for React and Lucide -->
+  <!-- ESM Import Map for React, Lucide, GSAP, Lenis -->
   <script type="importmap">
     {
       "imports": {
         "react": "https://esm.sh/react@18.2.0",
         "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-        "lucide-react": "https://esm.sh/lucide-react@0.292.0"
+        "lucide-react": "https://esm.sh/lucide-react@0.292.0",
+        "gsap": "https://esm.sh/gsap@3.13.0",
+        "gsap/ScrollTrigger": "https://esm.sh/gsap@3.13.0/ScrollTrigger",
+        "lenis": "https://esm.sh/lenis@1.1.20"
       }
     }
   </script>
 
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #020617; }
-    h1, h2, h3, h4, h5, h6, .logo-text { font-family: 'Outfit', sans-serif; }
-    html { scroll-behavior: smooth; }
+    :root {
+      --teal: #2dd4bf;
+      --blue: #3b82f6;
+      --bg: #020617;
+    }
+    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    html, body { background-color: var(--bg); }
+    body { font-family: 'Inter', sans-serif; overflow-x: hidden; }
+    h1, h2, h3, h4, h5, h6, .logo-text { font-family: 'Outfit', sans-serif; letter-spacing: -0.02em; }
+    h1 { letter-spacing: -0.035em; }
+    .font-mono, code, kbd { font-family: 'JetBrains Mono', monospace; }
+    /* Lenis is enabled via JS — disable native smooth scroll so it doesn't double up */
+    html.lenis { height: auto; }
+    html.lenis.lenis-smooth { scroll-behavior: auto !important; }
+    html.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+    html.lenis.lenis-stopped { overflow: hidden; }
+    html.lenis.lenis-scrolling iframe { pointer-events: none; }
+
     .bg-grid-pattern {
       background-size: 40px 40px;
       background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
@@ -40,17 +58,176 @@
     .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 1); border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(51, 65, 85, 1); border-radius: 4px; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(71, 85, 105, 1); }
+
+    ::-webkit-scrollbar { width: 0; background: transparent; }
+    ::selection { background: rgba(45, 212, 191, 0.35); color: #fff; }
+
+    /* ─── PRELOADER ──────────────────────────── */
+    #preloader {
+      position: fixed; inset: 0; z-index: 9998;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity 0.8s cubic-bezier(0.65, 0, 0.35, 1), visibility 0.8s;
+    }
+    #preloader.done { opacity: 0; visibility: hidden; pointer-events: none; }
+    #preloader .pl-mark {
+      font-family: 'Outfit', sans-serif; font-weight: 900;
+      font-size: clamp(3rem, 9vw, 7rem); letter-spacing: -0.06em;
+      color: #fff; line-height: 1;
+      display: flex; align-items: baseline; gap: 0.5rem;
+      opacity: 0; animation: plFade 0.6s 0.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    #preloader .pl-dot {
+      width: 0.6em; height: 0.6em; border-radius: 999px;
+      background: linear-gradient(135deg, var(--teal), var(--blue));
+      transform: translateY(-0.05em);
+      animation: plPulse 1.4s ease-in-out infinite;
+    }
+    #preloader .pl-bar {
+      position: absolute; bottom: 0; left: 0; height: 2px;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+      width: 0%; animation: plProg 1.6s 0.2s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+    }
+    @keyframes plFade { to { opacity: 1; } }
+    @keyframes plPulse { 0%, 100% { opacity: 1; transform: translateY(-0.05em) scale(1); } 50% { opacity: 0.5; transform: translateY(-0.05em) scale(0.85); } }
+    @keyframes plProg { to { width: 100%; } }
+
+    /* ─── GRAIN OVERLAY ──────────────────────── */
+    .grain-overlay {
+      position: fixed; inset: 0; z-index: 9997; pointer-events: none;
+      opacity: 0.06; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* ─── AURORA BG (subtle) ─────────────────── */
+    .aurora { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+    .aurora::before, .aurora::after {
+      content: ''; position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.4;
+    }
+    .aurora::before {
+      width: 60vw; height: 60vw; left: -20vw; top: -20vw;
+      background: radial-gradient(circle, rgba(45, 212, 191, 0.25), transparent 60%);
+      animation: auroraDrift 22s ease-in-out infinite alternate;
+    }
+    .aurora::after {
+      width: 70vw; height: 70vw; right: -25vw; bottom: -30vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.22), transparent 60%);
+      animation: auroraDrift 28s ease-in-out -8s infinite alternate-reverse;
+    }
+    @keyframes auroraDrift {
+      0%   { transform: translate(0, 0) scale(1); }
+      50%  { transform: translate(8vw, 6vh) scale(1.1); }
+      100% { transform: translate(-6vw, -4vh) scale(0.95); }
+    }
+
+    /* ─── SCROLL PROGRESS BAR ────────────────── */
+    .scroll-prog {
+      position: fixed; top: 0; left: 0; height: 2px; width: 0;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+      z-index: 100; transform-origin: left;
+      box-shadow: 0 0 12px rgba(45, 212, 191, 0.6);
+    }
+
+    /* ─── SECTION DOTS ───────────────────────── */
+    .section-dots {
+      position: fixed; right: 1.5rem; top: 50%; transform: translateY(-50%);
+      z-index: 40; display: none; flex-direction: column; gap: 0.85rem;
+    }
+    @media (min-width: 1024px) { .section-dots { display: flex; } }
+    .section-dots a {
+      position: relative; width: 8px; height: 8px; border-radius: 999px;
+      background: rgba(148, 163, 184, 0.3); transition: all 0.3s ease;
+    }
+    .section-dots a::before {
+      content: attr(data-label); position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
+      color: rgba(148, 163, 184, 0.6); white-space: nowrap; letter-spacing: 0.1em; text-transform: uppercase;
+      opacity: 0; transition: opacity 0.25s ease, transform 0.25s ease;
+      transform: translate(8px, -50%); pointer-events: none;
+    }
+    .section-dots a:hover { background: var(--teal); transform: scale(1.4); }
+    .section-dots a:hover::before { opacity: 1; transform: translate(0, -50%); }
+    .section-dots a.is-active { background: var(--teal); box-shadow: 0 0 12px var(--teal); transform: scale(1.3); }
+
+    /* ─── CUSTOM CURSOR (desktop only) ───────── */
+    .ap-cursor, .ap-cursor-dot {
+      position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
+      mix-blend-mode: difference; will-change: transform;
+    }
+    .ap-cursor {
+      width: 36px; height: 36px; border: 1.5px solid rgba(255, 255, 255, 0.9);
+      border-radius: 999px; transform: translate(-50%, -50%);
+      transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+    }
+    .ap-cursor.is-hover { width: 60px; height: 60px; border-color: var(--teal); }
+    .ap-cursor-dot {
+      width: 4px; height: 4px; background: #fff; border-radius: 999px;
+      transform: translate(-50%, -50%);
+    }
+    @media (hover: none), (pointer: coarse) {
+      .ap-cursor, .ap-cursor-dot { display: none; }
+    }
+    body.cursor-active { cursor: none; }
+    body.cursor-active a, body.cursor-active button { cursor: none; }
+
+    /* ─── REVEAL ANIMATIONS ─────────────────── */
+    [data-reveal] { opacity: 0; transform: translateY(40px); will-change: opacity, transform; }
+    [data-reveal-stagger] > * { opacity: 0; transform: translateY(30px); will-change: opacity, transform; }
+    .hero-line { display: block; overflow: hidden; }
+    .hero-line > span { display: inline-block; transform: translateY(110%); will-change: transform; }
+
+    /* ─── REFINED HOVERS / FOCUS ─────────────── */
+    a, button { transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--teal); outline-offset: 4px; border-radius: 8px;
+    }
+
+    /* ─── CARD POLISH ────────────────────────── */
+    .ap-card-hover { transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, background 0.4s ease; }
+    .ap-card-hover:hover { transform: translateY(-4px); }
+
+    /* ─── REDUCED MOTION ─────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+      .aurora::before, .aurora::after { animation: none !important; }
+      [data-reveal], [data-reveal-stagger] > *, .hero-line > span { opacity: 1 !important; transform: none !important; }
+    }
   </style>
 </head>
 <body class="text-slate-300 antialiased selection:bg-teal-500/30">
+
+  <!-- Preloader -->
+  <div id="preloader">
+    <div class="pl-mark">AP<span class="pl-dot"></span></div>
+    <div class="pl-bar"></div>
+  </div>
+
+  <!-- Ambient layers -->
+  <div class="aurora" aria-hidden="true"></div>
+  <div class="grain-overlay" aria-hidden="true"></div>
+
+  <!-- Scroll progress -->
+  <div class="scroll-prog" id="scrollProg" aria-hidden="true"></div>
+
+  <!-- Section dot nav -->
+  <nav class="section-dots" id="sectionDots" aria-label="Section navigation"></nav>
+
+  <!-- Custom cursor -->
+  <div class="ap-cursor" id="apCursor" aria-hidden="true"></div>
+  <div class="ap-cursor-dot" id="apCursorDot" aria-hidden="true"></div>
 
   <!-- The React app will inject here -->
   <div id="root"></div>
 
   <!-- React Application Code -->
   <script type="text/babel" data-type="module">
-    import React, { useState, useRef } from 'react';
+    import React, { useState, useRef, useEffect } from 'react';
     import { createRoot } from 'react-dom/client';
+    import gsap from 'gsap';
+    import { ScrollTrigger } from 'gsap/ScrollTrigger';
+    import Lenis from 'lenis';
+
+    gsap.registerPlugin(ScrollTrigger);
     import { 
       Globe, Shield, Cpu, Activity, Zap, Factory, Crosshair, Layers, 
       ChevronRight, ChevronDown, BarChart3, Microscope, ShieldCheck, Map,
@@ -274,7 +451,14 @@
 
     // --- SECTION DIVIDER COMPONENT ---
     const SectionDivider = () => (
-      <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-700 to-transparent my-24"></div>
+      <div className="relative my-32 flex items-center justify-center">
+        <div className="absolute inset-x-0 top-1/2 h-px bg-gradient-to-r from-transparent via-slate-800 to-transparent"></div>
+        <div className="relative flex items-center gap-3 px-6 bg-slate-950">
+          <span className="block w-1.5 h-1.5 rounded-full bg-teal-400/60"></span>
+          <span className="block w-1 h-1 rounded-full bg-slate-700"></span>
+          <span className="block w-1 h-1 rounded-full bg-slate-700"></span>
+        </div>
+      </div>
     );
 
     // --- MAIN PORTAL COMPONENT ---
@@ -286,6 +470,184 @@
       // Carousel State
       const [currentSlide, setCurrentSlide] = useState(1);
       const totalSlides = 13;
+
+      // ─── PREMIUM ANIMATION LAYER ───────────────────────────────
+      useEffect(() => {
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isDesktop = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+        // 1) Lenis smooth scroll + GSAP ticker integration
+        const lenis = new Lenis({ lerp: 0.1, duration: 1.15, smoothWheel: true });
+        lenis.on('scroll', ScrollTrigger.update);
+        const raf = (time) => lenis.raf(time * 1000);
+        gsap.ticker.add(raf);
+        gsap.ticker.lagSmoothing(0);
+
+        // 2) Hide preloader after first paint
+        const pl = document.getElementById('preloader');
+        const hidePreloader = () => { pl && pl.classList.add('done'); };
+        const plTimer = setTimeout(hidePreloader, 1400);
+
+        // 3) Custom cursor (desktop only)
+        const cursor = document.getElementById('apCursor');
+        const cursorDot = document.getElementById('apCursorDot');
+        let cursorMove, cursorEnter, cursorLeave, hoverEls = [];
+        if (isDesktop && cursor && cursorDot) {
+          document.body.classList.add('cursor-active');
+          const pos = { x: window.innerWidth / 2, y: window.innerHeight / 2, cx: 0, cy: 0, dx: 0, dy: 0 };
+          cursorMove = (e) => { pos.x = e.clientX; pos.y = e.clientY; };
+          window.addEventListener('mousemove', cursorMove);
+          gsap.ticker.add(() => {
+            pos.cx += (pos.x - pos.cx) * 0.18;
+            pos.cy += (pos.y - pos.cy) * 0.18;
+            pos.dx += (pos.x - pos.dx) * 0.45;
+            pos.dy += (pos.y - pos.dy) * 0.45;
+            cursor.style.transform = `translate(${pos.cx}px, ${pos.cy}px) translate(-50%, -50%)`;
+            cursorDot.style.transform = `translate(${pos.dx}px, ${pos.dy}px) translate(-50%, -50%)`;
+          });
+          // Magnetic hover targets
+          hoverEls = Array.from(document.querySelectorAll('a, button, [data-magnetic]'));
+          cursorEnter = () => cursor.classList.add('is-hover');
+          cursorLeave = () => cursor.classList.remove('is-hover');
+          hoverEls.forEach(el => {
+            el.addEventListener('mouseenter', cursorEnter);
+            el.addEventListener('mouseleave', cursorLeave);
+          });
+        }
+
+        // 4) Scroll progress bar
+        const prog = document.getElementById('scrollProg');
+        const progST = ScrollTrigger.create({
+          start: 0, end: 'max',
+          onUpdate: (self) => { if (prog) prog.style.width = (self.progress * 100) + '%'; },
+        });
+
+        // 5) Section dot nav
+        const dotNav = document.getElementById('sectionDots');
+        const sections = Array.from(document.querySelectorAll('main section[id]'));
+        const dotMap = new Map();
+        if (dotNav) {
+          dotNav.innerHTML = '';
+          sections.forEach((s) => {
+            const a = document.createElement('a');
+            a.href = '#' + s.id;
+            a.setAttribute('data-label', s.id.replace('-', ' '));
+            a.addEventListener('click', (e) => { e.preventDefault(); lenis.scrollTo('#' + s.id, { offset: -80 }); });
+            dotNav.appendChild(a);
+            dotMap.set(s.id, a);
+          });
+        }
+        const dotTriggers = sections.map(s => ScrollTrigger.create({
+          trigger: s, start: 'top 40%', end: 'bottom 40%',
+          onToggle: (self) => {
+            const a = dotMap.get(s.id);
+            if (a) a.classList.toggle('is-active', self.isActive);
+          },
+        }));
+
+        // 6) Hero entrance choreography
+        if (!reduced) {
+          const heroTitle = document.querySelector('[data-anim="hero-title"]');
+          if (heroTitle) {
+            const tl = gsap.timeline({ delay: 0.6, defaults: { ease: 'expo.out' } });
+            tl.from('[data-anim="hero-badge"]', { y: 20, opacity: 0, duration: 0.8 })
+              .from(heroTitle.querySelectorAll('.hero-line > span'), { yPercent: 110, duration: 1.2, stagger: 0.08 }, '-=0.5')
+              .from('[data-anim="hero-sub"]', { y: 20, opacity: 0, duration: 0.9 }, '-=0.7')
+              .from('[data-anim="hero-chip"]', { y: 16, opacity: 0, duration: 0.6, stagger: 0.08 }, '-=0.6');
+          }
+          // Hero blob parallax
+          const heroBlob = document.querySelector('[data-anim="hero-blob"]');
+          if (heroBlob) {
+            gsap.to(heroBlob, {
+              yPercent: 25, xPercent: -15, scale: 1.15, ease: 'none',
+              scrollTrigger: { trigger: heroBlob, start: 'top top', end: '+=100%', scrub: 1 },
+            });
+          }
+        }
+
+        // 7) Auto-tag and reveal everything
+        // Mark every section's primary children + every key card group
+        const revealSelectors = [
+          'main section h2', 'main section h3', 'main section > div',
+          'main section .grid > *', 'main section [class*="rounded-2xl"]',
+          'main section [class*="rounded-3xl"]'
+        ];
+        const seen = new WeakSet();
+        const revealEls = [];
+        revealSelectors.forEach(sel => {
+          document.querySelectorAll(sel).forEach(el => {
+            if (seen.has(el)) return;
+            // skip elements inside the hero (already animated)
+            if (el.closest('#overview > div:first-child')) return;
+            // skip the ecosystem inner scroller content
+            if (el.closest('#ecosystem .overflow-auto')) return;
+            seen.add(el);
+            revealEls.push(el);
+          });
+        });
+        const revealTriggers = revealEls.map(el => {
+          gsap.set(el, { opacity: 0, y: 40 });
+          return ScrollTrigger.create({
+            trigger: el, start: 'top 88%', once: true,
+            onEnter: () => gsap.to(el, { opacity: 1, y: 0, duration: 0.9, ease: 'expo.out' }),
+          });
+        });
+
+        // 8) Magnetic effect on key buttons
+        const magnets = document.querySelectorAll('[data-magnetic]');
+        const magnetCleanups = [];
+        if (isDesktop && !reduced) {
+          magnets.forEach(el => {
+            const onMove = (e) => {
+              const r = el.getBoundingClientRect();
+              const mx = e.clientX - r.left - r.width / 2;
+              const my = e.clientY - r.top - r.height / 2;
+              gsap.to(el, { x: mx * 0.25, y: my * 0.25, duration: 0.5, ease: 'power3.out' });
+            };
+            const onLeave = () => gsap.to(el, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
+            el.addEventListener('mousemove', onMove);
+            el.addEventListener('mouseleave', onLeave);
+            magnetCleanups.push(() => {
+              el.removeEventListener('mousemove', onMove);
+              el.removeEventListener('mouseleave', onLeave);
+            });
+          });
+        }
+
+        // 9) Hijack in-page anchor clicks → Lenis (so dropdown nav animates smoothly too)
+        const anchorHandler = (e) => {
+          const a = e.target.closest('a[href^="#"]');
+          if (!a) return;
+          const id = a.getAttribute('href');
+          if (!id || id === '#') return;
+          const target = document.querySelector(id);
+          if (!target) return;
+          e.preventDefault();
+          lenis.scrollTo(target, { offset: -80, duration: 1.4 });
+        };
+        document.addEventListener('click', anchorHandler);
+
+        // Refresh after layout settles (images, fonts)
+        const refreshT = setTimeout(() => ScrollTrigger.refresh(), 300);
+        window.addEventListener('load', () => ScrollTrigger.refresh());
+
+        return () => {
+          clearTimeout(plTimer); clearTimeout(refreshT);
+          gsap.ticker.remove(raf);
+          lenis.destroy();
+          progST && progST.kill();
+          dotTriggers.forEach(t => t.kill());
+          revealTriggers.forEach(t => t.kill());
+          magnetCleanups.forEach(fn => fn());
+          if (cursorMove) window.removeEventListener('mousemove', cursorMove);
+          if (cursorEnter) hoverEls.forEach(el => {
+            el.removeEventListener('mouseenter', cursorEnter);
+            el.removeEventListener('mouseleave', cursorLeave);
+          });
+          document.removeEventListener('click', anchorHandler);
+          document.body.classList.remove('cursor-active');
+        };
+      }, []);
 
       const toggleAudio = () => {
         if (audioRef.current) {
@@ -340,14 +702,18 @@
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)}></div>
                       <div className="absolute right-0 mt-3 w-64 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl py-2 z-50">
-                        {navLinks.map(link => (
+                        {navLinks.map((link, i) => (
                           <a
                             key={link.id}
                             href={`#${link.id}`}
                             onClick={() => setIsMenuOpen(false)}
-                            className="block px-5 py-3 text-sm text-slate-300 hover:text-teal-400 hover:bg-slate-800/50 transition-colors font-medium"
+                            className="group flex items-center justify-between px-5 py-3 text-sm text-slate-300 hover:text-teal-400 hover:bg-slate-800/50 transition-colors font-medium"
                           >
-                            {link.label}
+                            <span className="flex items-center gap-3">
+                              <span className="font-mono text-[10px] text-slate-600 group-hover:text-teal-500/70 transition-colors">{String(i + 1).padStart(2, '0')}</span>
+                              {link.label}
+                            </span>
+                            <ArrowUpRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                           </a>
                         ))}
                       </div>
@@ -367,28 +733,30 @@
             <section id="overview" className="space-y-12 pt-8 scroll-mt-24">
               {/* Hero */}
               <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 p-8 md:p-16">
-                <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div data-anim="hero-blob" className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
                 <div className="relative z-10 max-w-3xl">
-                  <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-semibold uppercase tracking-widest mb-6">
+                  <div data-anim="hero-badge" className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-semibold uppercase tracking-widest mb-6">
                     <ShieldCheck className="w-4 h-4" />
                     <span>Tier-1 MedTech CDMO</span>
                   </div>
-                  <h1 className="text-5xl md:text-6xl font-extrabold text-white tracking-tight mb-6">
-                    Precision Medical Manufacturing at <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">Global Scale</span>
+                  <h1 data-anim="hero-title" className="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 leading-[1.05]">
+                    <span className="hero-line"><span>Precision Medical</span></span>
+                    <span className="hero-line"><span>Manufacturing at</span></span>
+                    <span className="hero-line"><span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">Global Scale.</span></span>
                   </h1>
-                  <p className="text-xl text-slate-400 mb-8 leading-relaxed">
+                  <p data-anim="hero-sub" className="text-xl text-slate-400 mb-8 leading-relaxed max-w-2xl">
                     Transitioning from a boutique extruder to a vertically integrated, multi-continent platform. Derisking the global supply chain for Class II & III medical devices.
                   </p>
                   <div className="flex flex-wrap gap-4">
-                    <div className="flex items-center space-x-2 text-sm text-slate-300 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
+                    <div data-anim="hero-chip" className="flex items-center space-x-2 text-sm text-slate-300 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
                       <Crosshair className="w-4 h-4 text-teal-400" />
                       <span>±0.0003" Tolerances</span>
                     </div>
-                    <div className="flex items-center space-x-2 text-sm text-slate-300 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
+                    <div data-anim="hero-chip" className="flex items-center space-x-2 text-sm text-slate-300 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
                       <Globe className="w-4 h-4 text-blue-400" />
                       <span>4-Continent Footprint</span>
                     </div>
-                    <div className="flex items-center space-x-2 text-sm text-slate-300 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
+                    <div data-anim="hero-chip" className="flex items-center space-x-2 text-sm text-slate-300 bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700">
                       <BarChart3 className="w-4 h-4 text-purple-400" />
                       <span>AGIC Capital Backed</span>
                     </div>
@@ -404,10 +772,10 @@
                   { label: 'Estimated Capacity', value: '$66M', sub: 'Annual Theoretical Limit' },
                   { label: 'Concurrent Projects', value: '100+', sub: 'Active NPI & Scaling' }
                 ].map((metric, i) => (
-                  <div key={i} className="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-teal-500/30 transition-colors">
-                    <div className="text-slate-500 text-sm font-medium mb-2 uppercase tracking-wider">{metric.label}</div>
-                    <div className="text-4xl font-bold text-white mb-1">{metric.value}</div>
-                    <div className="text-xs text-teal-400/80">{metric.sub}</div>
+                  <div key={i} className="ap-card-hover bg-slate-900/80 backdrop-blur-sm border border-slate-800 rounded-2xl p-6 hover:border-teal-500/40 hover:bg-slate-900">
+                    <div className="text-slate-500 text-[11px] font-mono font-medium mb-3 uppercase tracking-[0.15em]">{metric.label}</div>
+                    <div className="text-5xl font-extrabold text-white mb-2 tracking-tight">{metric.value}</div>
+                    <div className="text-xs text-teal-400/80 font-medium">{metric.sub}</div>
                   </div>
                 ))}
               </div>
@@ -463,9 +831,10 @@
                             onPlay={() => setIsPlaying(true)}
                             className="hidden"
                           />
-                          <button 
+                          <button
                             onClick={toggleAudio}
-                            className="w-14 h-14 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center flex-shrink-0 hover:scale-105 transition-transform shadow-[0_0_20px_rgba(59,130,246,0.3)]"
+                            data-magnetic
+                            className="w-14 h-14 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center flex-shrink-0 hover:scale-105 transition-transform shadow-[0_0_30px_rgba(59,130,246,0.45)]"
                           >
                             {isPlaying ? (
                               <Pause className="w-6 h-6 text-white" fill="currentColor" />
@@ -1049,7 +1418,8 @@
                     <button 
                       onClick={prevSlide} 
                       disabled={currentSlide === 1}
-                      className="p-2 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      data-magnetic
+                      className="p-3 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-slate-700/50"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
@@ -1064,7 +1434,8 @@
                     <button 
                       onClick={nextSlide}
                       disabled={currentSlide === totalSlides}
-                      className="p-2 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      data-magnetic
+                      className="p-3 rounded-full bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-slate-700/50"
                     >
                       <ChevronRight className="w-5 h-5" />
                     </button>
